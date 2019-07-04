@@ -119,9 +119,6 @@ class MapActivity : AppCompatActivity(),
 
         with(map.locationComponent) {
             activateLocationComponent(locationComponentActivationOptions)
-            cameraMode = CameraMode.TRACKING
-            renderMode = RenderMode.COMPASS
-
             isLocationComponentEnabled = true
         }
 
@@ -148,8 +145,14 @@ class MapActivity : AppCompatActivity(),
 
             // Update location component
             map.locationComponent.apply {
+
+                renderMode = RenderMode.GPS
+                cameraMode = CameraMode.TRACKING_GPS
+
+                zoomWhileTracking(15.0)
+                tiltWhileTracking(45.0, 1000)
+
                 forceLocationUpdate(this@run)
-                zoomWhileTracking(14.0)
             }
 
             // Create socket data
