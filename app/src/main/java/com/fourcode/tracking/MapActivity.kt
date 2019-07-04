@@ -46,7 +46,6 @@ class MapActivity : AppCompatActivity(),
     }
 
     private fun initializeSocket() {
-
         socket = IO.socket(SOCKET_URI).apply {
 
             // Log when connected
@@ -102,9 +101,16 @@ class MapActivity : AppCompatActivity(),
     /* LocationEngineCallback methods */
     override fun onSuccess(result: LocationEngineResult?) {
         result?.lastLocation?.run {
-            val data = SocketLocationData(latitude, longitude)
-            socket.emit("location", Gson().toJson(data))
+
+            // Create socket data
+            val data = SocketLocationData(latitude, longitude, speed)
+
+            // Send new data to socket
             info("Broadcasting location $data")
+
+            // Emit data if moving
+            if (data.speed > 0) socket.emit("location", Gson().toJson(data))
+
         }
     }
 
