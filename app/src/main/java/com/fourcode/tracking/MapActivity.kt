@@ -84,20 +84,19 @@ class MapActivity : AppCompatActivity(),
         if (::socket.isInitialized) socket.connect()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<out String>,
-                                            grantResults: IntArray) {
-        this.permissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray) {
+        this.permissions.onRequestPermissionsResult(
+            requestCode, permissions, grantResults)
     }
 
     /* PermissionListener methods */
-    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-
-    }
+    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {}
 
     override fun onPermissionResult(granted: Boolean) {
         if (granted) initializeLocationEngine()
-
     }
 
     /* LocationEngineCallback methods */
@@ -105,7 +104,6 @@ class MapActivity : AppCompatActivity(),
         result?.lastLocation?.run {
             val data = SocketLocationData(latitude, longitude)
             socket.emit("location", Gson().toJson(data))
-
             info("Broadcasting location $data")
         }
     }
@@ -126,7 +124,6 @@ class MapActivity : AppCompatActivity(),
     }
 
     companion object {
-
         private const val SOCKET_URI = "https://tracking-project.herokuapp.com"
         private const val DEFAULT_INTERVAL_MS = 1000L
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
