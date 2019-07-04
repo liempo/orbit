@@ -1,28 +1,37 @@
 package com.fourcode.tracking
 
 import android.annotation.SuppressLint
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.fourcode.tracking.models.SocketLocationData
+import android.os.PersistableBundle
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_map.*
+
 import com.google.gson.Gson
+import com.fourcode.tracking.models.SocketLocationData
+
 import com.mapbox.android.core.location.*
-import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.android.core.permissions.*
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.maps.MapboxMap
+
 import io.socket.client.IO
 import io.socket.client.Socket
+
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
-import java.lang.Exception
 
 class MapActivity : AppCompatActivity(),
     AnkoLogger, PermissionsListener,
     LocationEngineCallback<LocationEngineResult> {
 
+    // Location attributes
     private lateinit var socket: Socket
     private lateinit var engine: LocationEngine
     private lateinit var permissions: PermissionsManager
+
+    // Map attributes
+    private lateinit var map: MapboxMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -31,6 +40,12 @@ class MapActivity : AppCompatActivity(),
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
+
+        // Initialize mapView
+        map_view.onCreate(savedInstanceState)
+        map_view.getMapAsync {
+            map = it
+        }
 
         // Initialize socket IO
         initializeSocket()
@@ -116,6 +131,32 @@ class MapActivity : AppCompatActivity(),
 
     override fun onFailure(exception: Exception) {
         warn("Failed retrieving location", exception)
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+        map_view.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        map_view.onResume()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        map_view.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        map_view.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        map_view.onLowMemory()
     }
 
     override fun onDestroy() {
