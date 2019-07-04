@@ -175,7 +175,6 @@ class MapActivity : AppCompatActivity(),
         warn("Failed retrieving location", exception)
     }
 
-
     override fun onStart() {
         super.onStart()
         map_view.onStart()
