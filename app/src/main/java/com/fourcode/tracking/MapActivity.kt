@@ -12,7 +12,11 @@ import com.fourcode.tracking.models.SocketLocationData
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.*
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.location.modes.CameraMode
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 
 import io.socket.client.IO
@@ -23,7 +27,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
 
 class MapActivity : AppCompatActivity(),
-    AnkoLogger, PermissionsListener,
+    AnkoLogger,  OnMapReadyCallback, PermissionsListener,
     LocationEngineCallback<LocationEngineResult> {
 
     // Location attributes
@@ -35,6 +39,7 @@ class MapActivity : AppCompatActivity(),
     // Map attributes
     private lateinit var map: MapboxMap
 
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,20 +49,24 @@ class MapActivity : AppCompatActivity(),
 
         // Initialize mapView
         map_view.onCreate(savedInstanceState)
-        map_view.getMapAsync {
-            map = it.apply { setStyle(Style.TRAFFIC_NIGHT) }
-        }
+        map_view.getMapAsync(this)
 
         // Initialize socket IO
         initializeSocket()
+    }
 
-        // Check if permissions are granted
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
-            initializeLocationEngine()
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        map = mapboxMap
+        map.setStyle(Style.TRAFFIC_NIGHT) {
 
-        // else request for permissions
-        } else permissions = PermissionsManager(this).also {
-            it.requestLocationPermissions(this@MapActivity)
+            // Check if permissions are granted
+            if (PermissionsManager.areLocationPermissionsGranted(this)) {
+                enableLocationComponent(it)
+                initializeLocationEngine()
+            } else {
+                permissions = PermissionsManager(this)
+                permissions.requestLocationPermissions(this@MapActivity)
+            }
         }
     }
 
@@ -99,6 +108,25 @@ class MapActivity : AppCompatActivity(),
         if (::socket.isInitialized) socket.connect()
     }
 
+    @SuppressLint("MissingPermission")
+    private fun enableLocationComponent(style: Style) {
+
+        // Enable location component on style loaded
+        val locationComponentActivationOptions =
+            LocationComponentActivationOptions.builder(this, style)
+                .useDefaultLocationEngine(false)
+                .build()
+
+        with(map.locationComponent) {
+            activateLocationComponent(locationComponentActivationOptions)
+            cameraMode = CameraMode.TRACKING
+            renderMode = RenderMode.COMPASS
+
+            isLocationComponentEnabled = true
+        }
+
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -117,6 +145,12 @@ class MapActivity : AppCompatActivity(),
     /* LocationEngineCallback methods */
     override fun onSuccess(result: LocationEngineResult?) {
         result?.lastLocation?.run {
+
+            // Update location component
+            map.locationComponent.apply {
+                forceLocationUpdate(this@run)
+                zoomWhileTracking(14.0)
+            }
 
             // Create socket data
             val data = SocketLocationData(latitude, longitude, speed)
