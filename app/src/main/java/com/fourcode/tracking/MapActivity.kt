@@ -24,6 +24,7 @@ import io.socket.client.Socket
 
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.verbose
 import org.jetbrains.anko.warn
 
 class MapActivity : AppCompatActivity(),
@@ -78,12 +79,6 @@ class MapActivity : AppCompatActivity(),
                 info("Socket connected")
             }
 
-            // Log messages received
-            on(Socket.EVENT_MESSAGE) { results ->
-                results.forEach {
-                    info("Socket Message: $it")
-                }
-            }
         }
     }
 
@@ -161,7 +156,7 @@ class MapActivity : AppCompatActivity(),
             // Emit data if moving or if is initial location is not found
             if (data.speed > 0 || isLocationFound.not()) {
 
-                info("Broadcasting location $data")
+                verbose("Broadcasting location $data")
                 socket.emit("location", Gson().toJson(data))
 
                 // set isLocationFound to true so data will only emit if speed > 0
