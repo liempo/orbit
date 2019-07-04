@@ -13,6 +13,7 @@ import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.*
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
 
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -26,6 +27,7 @@ class MapActivity : AppCompatActivity(),
     LocationEngineCallback<LocationEngineResult> {
 
     // Location attributes
+    private var isLocationFound = false
     private lateinit var socket: Socket
     private lateinit var engine: LocationEngine
     private lateinit var permissions: PermissionsManager
@@ -34,17 +36,16 @@ class MapActivity : AppCompatActivity(),
     private lateinit var map: MapboxMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         // Mapbox access token is configured here.
         Mapbox.getInstance(this, BuildConfig.MapboxApiKey)
-
-        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
         // Initialize mapView
         map_view.onCreate(savedInstanceState)
         map_view.getMapAsync {
-            map = it
+            map = it.apply { setStyle(Style.TRAFFIC_NIGHT) }
         }
 
         // Initialize socket IO
@@ -71,7 +72,7 @@ class MapActivity : AppCompatActivity(),
             // Log messages received
             on(Socket.EVENT_MESSAGE) { results ->
                 results.forEach {
-                    info("Socket: $it")
+                    info("Socket Message: $it")
                 }
             }
         }
@@ -120,11 +121,15 @@ class MapActivity : AppCompatActivity(),
             // Create socket data
             val data = SocketLocationData(latitude, longitude, speed)
 
-            // Send new data to socket
-            info("Broadcasting location $data")
+            // Emit data if moving or if is initial location is not found
+            if (data.speed > 0 || isLocationFound.not()) {
 
-            // Emit data if moving
-            if (data.speed > 0) socket.emit("location", Gson().toJson(data))
+                info("Broadcasting location $data")
+                socket.emit("location", Gson().toJson(data))
+
+                // set isLocationFound to true so data will only emit if speed > 0
+                isLocationFound = true
+            }
 
         }
     }
@@ -161,6 +166,7 @@ class MapActivity : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
+        map_view.onDestroy()
 
         // Disable location updates
         if (::engine.isInitialized)
