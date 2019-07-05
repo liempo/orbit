@@ -58,7 +58,7 @@ class MapActivity : AppCompatActivity(),
 
     override fun onMapReady(mapboxMap: MapboxMap) {
         map = mapboxMap
-        map.setStyle(Style.TRAFFIC_NIGHT) {
+        map.setStyle(Style.TRAFFIC_DAY) {
 
             // Check if permissions are granted
             if (PermissionsManager.areLocationPermissionsGranted(this)) {
