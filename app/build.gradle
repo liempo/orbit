@@ -35,8 +35,8 @@ dependencies {
     // Mapbox sdk
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.1.0'
 
-    // Anko Commons
-    implementation "org.jetbrains.anko:anko-commons:$anko_version"
+    // Timber kotlin extension
+    implementation 'com.github.ajalt:timberkt:1.5.1'
 
     // Sockets and stuff
     implementation 'com.google.code.gson:gson:2.8.5'

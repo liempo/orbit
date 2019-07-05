@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.content_map.*
 
 import com.google.gson.Gson
 import com.fourcode.tracking.models.SocketLocationData
+import com.github.ajalt.timberkt.Timber
 
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.*
@@ -22,13 +23,8 @@ import com.mapbox.mapboxsdk.maps.Style
 import io.socket.client.IO
 import io.socket.client.Socket
 
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
-import org.jetbrains.anko.warn
-
 class MapActivity : AppCompatActivity(),
-    AnkoLogger,  OnMapReadyCallback, PermissionsListener,
+    OnMapReadyCallback, PermissionsListener,
     LocationEngineCallback<LocationEngineResult> {
 
     // Location attributes
@@ -42,6 +38,11 @@ class MapActivity : AppCompatActivity(),
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        // Plant a DebugTree
+        Timber.plant(Timber.DebugTree())
+
+        // Run super method
         super.onCreate(savedInstanceState)
 
         // Mapbox access token is configured here.
@@ -76,7 +77,7 @@ class MapActivity : AppCompatActivity(),
 
             // Log when connected
             on(Socket.EVENT_CONNECT) {
-                info("Socket connected")
+                Timber.i{ "Socket connected" }
             }
 
         }
@@ -97,7 +98,7 @@ class MapActivity : AppCompatActivity(),
                     // Set callback to this class and pass activity's main looper
                     this@MapActivity, mainLooper)
             }
-        info("Initialized LocationEngine")
+        Timber.i {"Initialized LocationEngine" }
 
         // Connect socket once engine is initialized
         if (::socket.isInitialized) socket.connect()
@@ -156,7 +157,7 @@ class MapActivity : AppCompatActivity(),
             // Emit data if moving or if is initial location is not found
             if (data.speed > 0 || isLocationFound.not()) {
 
-                verbose("Broadcasting location $data")
+                Timber.v { "Broadcasting location $data" }
                 socket.emit("location", Gson().toJson(data))
 
                 // set isLocationFound to true so data will only emit if speed > 0
@@ -167,7 +168,7 @@ class MapActivity : AppCompatActivity(),
     }
 
     override fun onFailure(exception: Exception) {
-        warn("Failed retrieving location", exception)
+        Timber.w(exception) { "Failed retrieving location" }
     }
 
     override fun onStart() {
