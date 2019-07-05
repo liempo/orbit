@@ -155,7 +155,7 @@ class MapActivity : AppCompatActivity(),
             val data = SocketLocationData(latitude, longitude, speed)
 
             // Emit data if moving or if is initial location is not found
-            if (data.speed > 0 || isLocationFound.not()) {
+            if (CONTINUOUS_BROADCAST || data.speed > 0 || isLocationFound.not()) {
 
                 Timber.v { "Broadcasting location $data" }
                 socket.emit("location", Gson().toJson(data))
@@ -209,8 +209,14 @@ class MapActivity : AppCompatActivity(),
     }
 
     companion object {
+        // Base URL of socket server
         private const val SOCKET_URI = "https://tracking-project.herokuapp.com"
+
+        // Location update variables
         private const val DEFAULT_INTERVAL_MS = 1000L
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
+
+        // For debugging purposes
+        private const val CONTINUOUS_BROADCAST = true
     }
 }
