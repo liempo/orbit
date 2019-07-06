@@ -20,6 +20,9 @@ import com.mapbox.mapboxsdk.maps.*
 import io.socket.client.IO
 import io.socket.client.Socket
 
+
+// Need to suppress this because Mapbox
+@SuppressLint("MissingPermission")
 class MapActivity : AppCompatActivity(),
     OnMapReadyCallback, PermissionsListener,
     LocationEngineCallback<LocationEngineResult> {
@@ -33,13 +36,7 @@ class MapActivity : AppCompatActivity(),
     // Map attributes
     private lateinit var map: MapboxMap
 
-    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        // Plant a DebugTree
-        Timber.plant(Timber.DebugTree())
-
-        // Run super method
         super.onCreate(savedInstanceState)
 
         // Mapbox access token is configured here.
@@ -80,7 +77,6 @@ class MapActivity : AppCompatActivity(),
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun initializeLocationEngine() {
         engine = LocationEngineProvider
             .getBestLocationEngine(this).also {
@@ -101,7 +97,6 @@ class MapActivity : AppCompatActivity(),
         if (::socket.isInitialized) socket.connect()
     }
 
-    @SuppressLint("MissingPermission")
     private fun enableLocationComponent(style: Style) {
 
         // Enable location component on style loaded
