@@ -13,12 +13,9 @@ import com.github.ajalt.timberkt.Timber
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.*
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
-import com.mapbox.mapboxsdk.location.modes.RenderMode
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.location.*
+import com.mapbox.mapboxsdk.location.modes.*
+import com.mapbox.mapboxsdk.maps.*
 
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -217,6 +214,6 @@ class MapActivity : AppCompatActivity(),
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
 
         // For debugging purposes
-        private const val CONTINUOUS_BROADCAST = true
+        private const val CONTINUOUS_BROADCAST = false
     }
 }
