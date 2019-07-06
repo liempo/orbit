@@ -3,6 +3,7 @@ package com.fourcode.tracking
 import android.app.Application
 import com.github.ajalt.timberkt.Timber
 
+@Suppress("unused")
 class TimberApplication: Application() {
 
     override fun onCreate() {
