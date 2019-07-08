@@ -12,6 +12,10 @@ import com.fourcode.tracking.models.SocketLocationData
 
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.*
+import com.mapbox.api.geocoding.v5.GeocodingCriteria
+import com.mapbox.api.geocoding.v5.MapboxGeocoding
+import com.mapbox.api.geocoding.v5.models.GeocodingResponse
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.location.*
 import com.mapbox.mapboxsdk.location.modes.*
@@ -19,13 +23,17 @@ import com.mapbox.mapboxsdk.maps.*
 
 import io.socket.client.IO
 import io.socket.client.Socket
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 // Need to suppress this because Mapbox
 @SuppressLint("MissingPermission")
 class MapActivity : AppCompatActivity(),
     OnMapReadyCallback, PermissionsListener,
-    LocationEngineCallback<LocationEngineResult> {
+    LocationEngineCallback<LocationEngineResult>,
+    Callback<GeocodingResponse> {
 
     // Location attributes
     private var isInitialLocationFound = false
@@ -105,6 +113,14 @@ class MapActivity : AppCompatActivity(),
         }
     }
 
+    private fun requestReverseGeocode(lat: Double, lng: Double) {
+        MapboxGeocoding.builder()
+            .accessToken(BuildConfig.MapboxApiKey)
+            .geocodingTypes(GeocodingCriteria.TYPE_LOCALITY)
+            .query(Point.fromLngLat(lng, lat))
+            .build().enqueueCall(this)
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -118,6 +134,23 @@ class MapActivity : AppCompatActivity(),
 
     override fun onPermissionResult(granted: Boolean) {
         if (granted) startLocationEngine()
+    }
+
+    /* Callback<GeocodingResponse> methods */
+    override fun onFailure(call: Call<GeocodingResponse>, t: Throwable) {
+        Timber.e(t) { "Failed in requesting geocode" }
+    }
+
+    override fun onResponse(call: Call<GeocodingResponse>, response: Response<GeocodingResponse>) {
+        // Will crash if body is null, but will not happen
+        // onFailure will be called instead if request has error
+        val results = response.body()!!.features()
+
+        if (results.isEmpty())
+            Timber.d { "Geocode results are empty" }
+        else results.forEach {
+            Timber.i{ it.toJson() }
+        }
     }
 
     /* LocationEngineCallback methods */
@@ -143,6 +176,9 @@ class MapActivity : AppCompatActivity(),
 
                 Timber.v { "Broadcasting location $data" }
                 socket.emit("location", Gson().toJson(data))
+
+                // Get address of coordinates
+                requestReverseGeocode(latitude, longitude)
 
                 // set isInitialLocationFound to true so data will only emit if speed > 0
                 isInitialLocationFound = true
