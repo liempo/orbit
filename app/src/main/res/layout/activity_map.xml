@@ -16,10 +16,11 @@
             android:id="@+id/bottom_sheet"
             android:layout_width="match_parent"
             android:layout_height="@dimen/map_bottom_sheet_height"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimaryLight"
 
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             app:behavior_peekHeight="@dimen/map_bottom_sheet_peek_height">
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
