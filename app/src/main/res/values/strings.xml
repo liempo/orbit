@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Tracking</string>
     <string name="url_socket_to_broadcast_location">https://tracking-project.herokuapp.com</string>
+
+    <string name="placeholder_vehicle_name">SEX 420</string>
+    <string name="msg_loading">Loading</string>
+    <string name="format_meters_per_second">%.2f m/s</string>
+    <string name="format_kilometers_per_hour">%.2f km/h</string>
+
 </resources>

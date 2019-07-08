@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.location.*
 import com.mapbox.mapboxsdk.location.modes.*
 import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin
 
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -37,12 +38,14 @@ class MapActivity : AppCompatActivity(),
 
     // Location attributes
     private var isInitialLocationFound = false
+
+    // Socket object to broadcast locaton
     private lateinit var socket: Socket
+
+    // Mapbox attributes
+    private lateinit var map: MapboxMap
     private lateinit var engine: LocationEngine
     private lateinit var permissions: PermissionsManager
-
-    // Map attributes
-    private lateinit var map: MapboxMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +74,7 @@ class MapActivity : AppCompatActivity(),
 
             // Check if permissions are granted
             if (PermissionsManager.areLocationPermissionsGranted(this)) {
-                enableLocationComponent(it)
+                initializeMapComponents(it)
                 startLocationEngine()
             } else {
                 permissions = PermissionsManager(this)
@@ -100,7 +103,7 @@ class MapActivity : AppCompatActivity(),
         if (::socket.isInitialized) socket.connect()
     }
 
-    private fun enableLocationComponent(style: Style) {
+    private fun initializeMapComponents(style: Style) {
         // Enable location component on style loaded
         val locationComponentActivationOptions =
             LocationComponentActivationOptions.builder(this, style)
@@ -111,6 +114,9 @@ class MapActivity : AppCompatActivity(),
             activateLocationComponent(locationComponentActivationOptions)
             isLocationComponentEnabled = true
         }
+
+        // Enable buildings too
+        BuildingPlugin(map_view, map, style).apply { setVisibility(true) }
     }
 
     private fun requestReverseGeocode(lat: Double, lng: Double) {
@@ -146,11 +152,10 @@ class MapActivity : AppCompatActivity(),
         // onFailure will be called instead if request has error
         val results = response.body()!!.features()
 
-        if (results.isEmpty())
-            Timber.d { "Geocode results are empty" }
-        else results.forEach {
-            Timber.i{ it.toJson() }
-        }
+        current_place.text =
+            if (results.isEmpty())
+                getString(R.string.msg_loading)
+            else results[0].text()
     }
 
     /* LocationEngineCallback methods */
@@ -162,17 +167,17 @@ class MapActivity : AppCompatActivity(),
                 renderMode = RenderMode.GPS
                 cameraMode = CameraMode.TRACKING_GPS
 
-                zoomWhileTracking(15.0)
-                tiltWhileTracking(45.0, 1000)
+                zoomWhileTracking(18.0)
+                tiltWhileTracking(65.0, 3000)
 
                 forceLocationUpdate(this@run)
             }
 
-            // Create socket data
-            val data = SocketLocationData(latitude, longitude, speed)
-
             // Emit data if moving or if is initial location is not found
-            if (CONTINUOUS_BROADCAST || data.speed > 0 || isInitialLocationFound.not()) {
+            if (CONTINUOUS_BROADCAST || speed > 0 || isInitialLocationFound.not()) {
+
+                // Create socket data
+                val data = SocketLocationData(latitude, longitude, speed)
 
                 Timber.v { "Broadcasting location $data" }
                 socket.emit("location", Gson().toJson(data))
@@ -183,6 +188,10 @@ class MapActivity : AppCompatActivity(),
                 // set isInitialLocationFound to true so data will only emit if speed > 0
                 isInitialLocationFound = true
             }
+
+            // Update current_velocity, k/h = speed * 3.6
+            current_velocity.text = getString(
+                R.string.format_kilometers_per_hour, (speed  * 3.6))
         }
     }
 
