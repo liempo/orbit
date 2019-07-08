@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_map.*
 
 import com.google.gson.Gson
-import com.fourcode.tracking.models.SocketLocationData
 import com.github.ajalt.timberkt.Timber
+import com.fourcode.tracking.models.SocketLocationData
 
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.*
@@ -28,7 +28,7 @@ class MapActivity : AppCompatActivity(),
     LocationEngineCallback<LocationEngineResult> {
 
     // Location attributes
-    private var isLocationFound = false
+    private var isInitialLocationFound = false
     private lateinit var socket: Socket
     private lateinit var engine: LocationEngine
     private lateinit var permissions: PermissionsManager
@@ -43,12 +43,18 @@ class MapActivity : AppCompatActivity(),
         Mapbox.getInstance(this, BuildConfig.MapboxApiKey)
         setContentView(R.layout.activity_map)
 
+
+        // Initialize socket IO
+        socket = IO.socket(getString(R.string.url_socket_to_broadcast_location)).apply {
+            // Log connection is established
+            on(Socket.EVENT_CONNECT) {
+                Timber.i{ "Socket connected" }
+            }
+        }
+
         // Initialize mapView
         map_view.onCreate(savedInstanceState)
         map_view.getMapAsync(this)
-
-        // Initialize socket IO
-        initializeSocket()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -58,7 +64,7 @@ class MapActivity : AppCompatActivity(),
             // Check if permissions are granted
             if (PermissionsManager.areLocationPermissionsGranted(this)) {
                 enableLocationComponent(it)
-                initializeLocationEngine()
+                startLocationEngine()
             } else {
                 permissions = PermissionsManager(this)
                 permissions.requestLocationPermissions(this@MapActivity)
@@ -66,18 +72,7 @@ class MapActivity : AppCompatActivity(),
         }
     }
 
-    private fun initializeSocket() {
-        socket = IO.socket(SOCKET_URI).apply {
-
-            // Log when connected
-            on(Socket.EVENT_CONNECT) {
-                Timber.i{ "Socket connected" }
-            }
-
-        }
-    }
-
-    private fun initializeLocationEngine() {
+    private fun startLocationEngine() {
         engine = LocationEngineProvider
             .getBestLocationEngine(this).also {
                 it.requestLocationUpdates(
@@ -98,7 +93,6 @@ class MapActivity : AppCompatActivity(),
     }
 
     private fun enableLocationComponent(style: Style) {
-
         // Enable location component on style loaded
         val locationComponentActivationOptions =
             LocationComponentActivationOptions.builder(this, style)
@@ -109,7 +103,6 @@ class MapActivity : AppCompatActivity(),
             activateLocationComponent(locationComponentActivationOptions)
             isLocationComponentEnabled = true
         }
-
     }
 
     override fun onRequestPermissionsResult(
@@ -124,13 +117,12 @@ class MapActivity : AppCompatActivity(),
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {}
 
     override fun onPermissionResult(granted: Boolean) {
-        if (granted) initializeLocationEngine()
+        if (granted) startLocationEngine()
     }
 
     /* LocationEngineCallback methods */
     override fun onSuccess(result: LocationEngineResult?) {
         result?.lastLocation?.run {
-
             // Update location component
             map.locationComponent.apply {
 
@@ -147,15 +139,14 @@ class MapActivity : AppCompatActivity(),
             val data = SocketLocationData(latitude, longitude, speed)
 
             // Emit data if moving or if is initial location is not found
-            if (CONTINUOUS_BROADCAST || data.speed > 0 || isLocationFound.not()) {
+            if (CONTINUOUS_BROADCAST || data.speed > 0 || isInitialLocationFound.not()) {
 
                 Timber.v { "Broadcasting location $data" }
                 socket.emit("location", Gson().toJson(data))
 
-                // set isLocationFound to true so data will only emit if speed > 0
-                isLocationFound = true
+                // set isInitialLocationFound to true so data will only emit if speed > 0
+                isInitialLocationFound = true
             }
-
         }
     }
 
@@ -201,9 +192,6 @@ class MapActivity : AppCompatActivity(),
     }
 
     companion object {
-        // Base URL of socket server
-        private const val SOCKET_URI = "https://tracking-project.herokuapp.com"
-
         // Location update variables
         private const val DEFAULT_INTERVAL_MS = 1000L
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5

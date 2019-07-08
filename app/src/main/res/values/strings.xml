@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Tracking</string>
+    <string name="url_socket_to_broadcast_location">https://tracking-project.herokuapp.com</string>
 </resources>
