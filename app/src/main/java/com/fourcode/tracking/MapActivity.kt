@@ -152,7 +152,7 @@ class MapActivity : AppCompatActivity(),
         // onFailure will be called instead if request has error
         val results = response.body()!!.features()
 
-        current_place.text =
+        place.text =
             if (results.isEmpty())
                 getString(R.string.msg_loading)
             else results[0].text()
@@ -190,7 +190,7 @@ class MapActivity : AppCompatActivity(),
             }
 
             // Update current_velocity, k/h = speed * 3.6
-            current_velocity.text = getString(
+            this@MapActivity.speed.text = getString(
                 R.string.format_kilometers_per_hour, (speed  * 3.6))
         }
     }
