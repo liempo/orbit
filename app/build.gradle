@@ -62,9 +62,8 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-places-v8:0.9.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-building-v8:0.6.0'
 
-
     // Timber kotlin extension
-    implementation 'com.github.ajalt:timberkt:1.5.1'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // Sockets and stuff
     implementation 'com.google.code.gson:gson:2.8.5'

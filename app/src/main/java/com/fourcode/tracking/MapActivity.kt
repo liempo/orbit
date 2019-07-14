@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_map.*
 
 import com.google.gson.Gson
-import com.github.ajalt.timberkt.Timber
 import com.fourcode.tracking.models.SocketLocationData
 
 import com.mapbox.android.core.location.*
@@ -27,6 +26,7 @@ import io.socket.client.Socket
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 
 
 // Need to suppress this because Mapbox
@@ -59,7 +59,7 @@ class MapActivity : AppCompatActivity(),
         socket = IO.socket(getString(R.string.url_socket_to_broadcast_location)).apply {
             // Log connection is established
             on(Socket.EVENT_CONNECT) {
-                Timber.i{ "Socket connected" }
+                Timber.i("Socket connected")
             }
         }
 
@@ -97,7 +97,7 @@ class MapActivity : AppCompatActivity(),
                     // Set callback to this class and pass activity's main looper
                     this@MapActivity, mainLooper)
             }
-        Timber.i {"Initialized LocationEngine" }
+        Timber.i("Initialized LocationEngine")
 
         // Connect socket once engine is initialized
         if (::socket.isInitialized) socket.connect()
@@ -144,7 +144,7 @@ class MapActivity : AppCompatActivity(),
 
     /* Callback<GeocodingResponse> methods */
     override fun onFailure(call: Call<GeocodingResponse>, t: Throwable) {
-        Timber.e(t) { "Failed in requesting geocode" }
+        Timber.e(t, "Failed in requesting geocode")
     }
 
     override fun onResponse(call: Call<GeocodingResponse>, response: Response<GeocodingResponse>) {
@@ -179,7 +179,7 @@ class MapActivity : AppCompatActivity(),
                 // Create socket data
                 val data = SocketLocationData(latitude, longitude, speed)
 
-                Timber.v { "Broadcasting location $data" }
+                Timber.v("Broadcasting location $data")
                 socket.emit("location", Gson().toJson(data))
 
                 // Get address of coordinates
@@ -196,7 +196,7 @@ class MapActivity : AppCompatActivity(),
     }
 
     override fun onFailure(exception: Exception) {
-        Timber.w(exception) { "Failed retrieving location" }
+        Timber.w(exception,"Failed retrieving location")
     }
 
     override fun onStart() {
