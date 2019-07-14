@@ -4,7 +4,7 @@ import android.app.Application
 import timber.log.Timber
 
 @Suppress("unused")
-class TimberApplication: Application() {
+class LoggableApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
