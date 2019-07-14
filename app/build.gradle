@@ -17,8 +17,27 @@ android {
     }
     buildTypes {
         debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Imports MAP_BOX_API_KEY into project from global gradle properties
+            buildConfigField 'String', "MapboxApiKey", MAPBOX_API_KEY
+        }
+
+        release {
+            // Enables code shrinking, obfuscation, and optimization for only
+            // your project's release build type.
+            minifyEnabled true
+
+            // Enables resource shrinking, which is performed by the
+            // Android Gradle plugin.
+            shrinkResources true
+
+            // Includes the default ProGuard rules files that are packaged with
+            // the Android Gradle plugin. To learn more, go to the section about
+            // R8 configuration files.
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+
+            // Imports MAP_BOX_API_KEY into project from global gradle properties
             buildConfigField 'String', "MapboxApiKey", MAPBOX_API_KEY
         }
     }
@@ -30,6 +49,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
+
+    // Material design component
     implementation 'com.google.android.material:material:1.0.0'
 
     // Mapbox sdk
@@ -43,7 +64,7 @@ dependencies {
 
     // Sockets and stuff
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation ('io.socket:socket.io-client:1.0.0') {
+    implementation('io.socket:socket.io-client:1.0.0') {
         // excluding org.json which is provided by Android
         exclude group: 'org.json', module: 'json'
     }
