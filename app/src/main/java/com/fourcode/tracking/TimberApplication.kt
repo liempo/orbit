@@ -1,7 +1,7 @@
 package com.fourcode.tracking
 
 import android.app.Application
-import com.github.ajalt.timberkt.Timber
+import timber.log.Timber
 
 @Suppress("unused")
 class TimberApplication: Application() {
