@@ -26,7 +26,7 @@
             android:id="@+id/navigate_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_directions_white_24dp"
+            android:src="@drawable/ic_navigation_white_24dp"
             android:layout_gravity="top|end"
             app:fabCustomSize="@dimen/map_navigate_fab_size"
             app:useCompatPadding="true"
@@ -61,7 +61,7 @@
                 <TextView
                         tools:text="Maunong"
                         android:id="@+id/destination_text"
-                        android:layout_width="@dimen/map_bottom_sheet_header_details_width"
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/msg_loading"
                         android:ellipsize="end"
@@ -74,24 +74,13 @@
                 <TextView
                         tools:text="429.69 km"
                         android:id="@+id/distance_text"
-                        android:layout_width="@dimen/map_bottom_sheet_header_details_width"
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/msg_loading"
                         android:gravity="center"
                         android:layout_marginEnd="@dimen/map_bottom_sheet_header_details_margine_end"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                        android:drawableStart="@drawable/ic_place_primary_24dp"/>
-
-                <TextView
-                        tools:text="1h 20m"
-                        android:id="@+id/eta_text"
-                        android:layout_width="@dimen/map_bottom_sheet_header_details_width"
-                        android:layout_height="match_parent"
-                        android:text="@string/msg_loading"
-                        android:gravity="center"
-                        android:layout_marginEnd="@dimen/map_bottom_sheet_header_details_margine_end"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                        android:drawableStart="@drawable/ic_time_primary_24dp"/>
+                        android:drawableStart="@drawable/ic_directions_primary_24dp"/>
 
             </LinearLayout>
 
