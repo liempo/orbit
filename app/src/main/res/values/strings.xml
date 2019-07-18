@@ -2,4 +2,5 @@
     <string name="app_name">Tracking</string>
     <string name="msg_location_permissions_needed">This app needs location permissions to continue.</string>
     <string name="action_retry">Retry</string>
+    <string name="msg_choose_destination">Choose a destination</string>
 </resources>

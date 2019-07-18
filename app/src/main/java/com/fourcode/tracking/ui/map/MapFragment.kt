@@ -76,6 +76,7 @@ class MapFragment : Fragment(),
         autocomplete = PlaceAutocomplete.IntentBuilder()
             .accessToken(BuildConfig.MapboxApiKey)
             .build(activity)
+
     }
 
     /** Enables location component, must be called after
@@ -127,15 +128,15 @@ class MapFragment : Fragment(),
         mapboxMap.apply {
             // Initialize map and set style
             map = this; setStyle(Style.TRAFFIC_DAY) {
-            // Check if permissions are granted
-            if (PermissionsManager.areLocationPermissionsGranted(context)) {
-                initializeLocationComponent(it)
-                initializeLocationEngine()
-            } else {
-                permissions = PermissionsManager(this@MapFragment)
-                permissions.requestLocationPermissions(activity)
+                // Check if permissions are granted
+                if (PermissionsManager.areLocationPermissionsGranted(context)) {
+                    initializeLocationComponent(it)
+                    initializeLocationEngine()
+                } else {
+                    permissions = PermissionsManager(this@MapFragment)
+                    permissions.requestLocationPermissions(activity)
+                }
             }
-        }
         }
     }
 
@@ -227,6 +228,8 @@ class MapFragment : Fragment(),
         // Location update variables
         private const val DEFAULT_INTERVAL_MS = 2000L
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
+
+        internal const val REQUEST_AUTOCOMPLETE = 420
 
     }
 
