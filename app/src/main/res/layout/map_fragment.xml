@@ -69,7 +69,8 @@
                         android:gravity="center"
                         android:layout_marginEnd="@dimen/map_bottom_sheet_header_details_margine_end"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                        android:drawableStart="@drawable/ic_place_primary_24dp"/>
+                        android:drawableStart="@drawable/ic_place_primary_24dp"
+                        android:drawablePadding="@dimen/map_bottom_sheet_header_drawable_padding"/>
 
                 <TextView
                         tools:text="429.69 km"
@@ -80,7 +81,8 @@
                         android:gravity="center"
                         android:layout_marginEnd="@dimen/map_bottom_sheet_header_details_margine_end"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                        android:drawableStart="@drawable/ic_directions_primary_24dp"/>
+                        android:drawableStart="@drawable/ic_directions_primary_24dp"
+                        android:drawablePadding="@dimen/map_bottom_sheet_header_drawable_padding"/>
 
             </LinearLayout>
 

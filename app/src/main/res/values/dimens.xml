@@ -3,6 +3,7 @@
     <dimen name="map_bottom_sheet_peek_height">48dp</dimen>
     <dimen name="map_bottom_sheet_header_margin_end">72dp</dimen>
     <dimen name="map_bottom_sheet_header_padding">12dp</dimen>
-    <dimen name="map_bottom_sheet_header_details_margine_end">4dp</dimen>
+    <dimen name="map_bottom_sheet_header_details_margine_end">8dp</dimen>
+    <dimen name="map_bottom_sheet_header_drawable_padding">8dp</dimen>
     <dimen name="map_navigate_fab_size">56dp</dimen>
 </resources>
