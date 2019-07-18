@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
+import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -47,7 +48,6 @@ class MapFragment : Fragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Mapbox access token is configured here, null check with context
         context?.let {  Mapbox.getInstance(it, BuildConfig.MapboxApiKey) }
     }
@@ -67,40 +67,21 @@ class MapFragment : Fragment(),
         map_view.getMapAsync(this)
     }
 
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        // Initialize map
-        map = mapboxMap
-
-        // Set a style then enable location component
-        map.setStyle(Style.TRAFFIC_DAY) {
-
-            // Check if permissions are granted
-            if (PermissionsManager.areLocationPermissionsGranted(context)) {
-                initializeLocationComponent(it)
-                initializeLocationEngine()
-            } else {
-                permissions = PermissionsManager(this)
-                permissions.requestLocationPermissions(activity)
-            }
-        }
-    }
-
+    /** Enables location component, must be called after
+     * style is loaded and permissions are granted */
     private fun initializeLocationComponent(style: Style) {
-        // Enable location component after
-        // style is loaded and permissions are granted
         context?.let {context ->
             with(map.locationComponent) {
-                // Will crash if context == null
-                val locationComponentActivationOptions =
+                // Activate location component with the following options
+                activateLocationComponent(
                     LocationComponentActivationOptions.builder(context, style)
                         .useDefaultLocationEngine(false)
                         .build()
+                )
 
-                activateLocationComponent(locationComponentActivationOptions)
-
+                // Set component modes and enable
                 renderMode = RenderMode.NORMAL
                 cameraMode = CameraMode.TRACKING
-
                 isLocationComponentEnabled = true
 
                 Timber.i("Initialized location component")
@@ -108,9 +89,9 @@ class MapFragment : Fragment(),
         }
     }
 
+    /** Initialize a location engine, and start it */
     private fun initializeLocationEngine() {
         context?.let { context ->
-
             engine = LocationEngineProvider
                 .getBestLocationEngine(context).also {
                     it.requestLocationUpdates(
@@ -130,6 +111,25 @@ class MapFragment : Fragment(),
         }
     }
 
+    /** Callback function for MapView.getAsync(). Runs after Mapview is initialized. */
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        // Set a style then enable location component
+        mapboxMap.apply {
+            // Initialize map and set style
+            map = this; setStyle(Style.TRAFFIC_DAY) {
+            // Check if permissions are granted
+            if (PermissionsManager.areLocationPermissionsGranted(context)) {
+                initializeLocationComponent(it)
+                initializeLocationEngine()
+            } else {
+                permissions = PermissionsManager(this@MapFragment)
+                permissions.requestLocationPermissions(activity)
+            }
+        }
+        }
+    }
+
+    /** Android Permission callback, will be run after user interacts with permission dialog. */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -138,15 +138,23 @@ class MapFragment : Fragment(),
             requestCode, permissions, grantResults)
     }
 
+    /** Shown when app asks for permission rationale. */
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-        // TODO Add SnackBar here
+        Snackbar.make(map_view,
+            R.string.msg_location_permissions_needed,
+            Snackbar.LENGTH_LONG)
+            .setAction(R.string.action_retry) {
+                permissions.requestLocationPermissions(activity)
+            }.show()
     }
 
+    /** Function is called after onRequestPermissionResult. */
     override fun onPermissionResult(granted: Boolean) {
         // Set a style then enable location component
         if (granted) initializeLocationEngine()
     }
 
+    /** LocationEngineCallbaack methods. Method name explains it. */
     override fun onSuccess(result: LocationEngineResult?) {
         // Update location component with new location
         result?.lastLocation?.run {
@@ -161,6 +169,7 @@ class MapFragment : Fragment(),
         }
     }
 
+    /** LocationEngineCallbaack methods. Method name explains it. */
     override fun onFailure(exception: Exception) {
         Timber.w(exception,"Failed retrieving location")
     }
@@ -205,7 +214,6 @@ class MapFragment : Fragment(),
     }
 
     companion object {
-
         // Location update variables
         private const val DEFAULT_INTERVAL_MS = 2000L
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
