@@ -3,4 +3,5 @@
     <color name="colorPrimary">#03c9fc</color>
     <color name="colorPrimaryLight">#6bfcff</color>
     <color name="colorPrimaryDark">#0098c9</color>
+    <color name="colorAutocompleteBackground">#FAFAFA</color>
 </resources>

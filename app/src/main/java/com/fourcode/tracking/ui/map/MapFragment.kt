@@ -1,18 +1,23 @@
 package com.fourcode.tracking.ui.map
 
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.api.geocoding.v5.models.CarmenFeature
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -23,6 +28,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import kotlinx.android.synthetic.main.map_fragment.*
 import timber.log.Timber
 import java.lang.Exception
@@ -44,12 +50,15 @@ class MapFragment : Fragment(),
      * which might be needed for navigation  */
     private lateinit var engine: LocationEngine
 
-    /** Set to true if initiale location is found,
-     * this is used for camera position and zooming */
-    private var isInitialLocationFound = false
+    /** Current updated position will be saved here. */
+    private lateinit var currentLocation: Location
 
     /** Intent used to search places (reverse geocoding). */
     private lateinit var autocomplete: Intent
+
+    /** Autocomplete result as a CarmenFeature object (idk why the class name is like that)
+     * NOTE: Always check if isInitialized cuz it might break */
+    private lateinit var destination: CarmenFeature
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,14 +78,34 @@ class MapFragment : Fragment(),
 
         // Initialize mapView (kotlin synthetic object)
         map_view.onCreate(savedInstanceState)
-
         map_view.getMapAsync(this)
 
-        // Create intent for autocomplete
-        autocomplete = PlaceAutocomplete.IntentBuilder()
-            .accessToken(BuildConfig.MapboxApiKey)
-            .build(activity)
+        // Initially hide fab, it ain't ready yet
+        navigate_fab.hide()
+    }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
+            // Extract results from intent
+            destination = PlaceAutocomplete.getPlace(data)
+
+            // Extract latLng from feature
+            val destLatLng = LatLng(
+                (destination.geometry() as Point).latitude(),
+                (destination.geometry() as Point).longitude())
+            val currentLatLng = LatLng(currentLocation)
+
+            // Calculate distance between two latLng (in meters)
+            val distanceInKilometers = currentLatLng.distanceTo(destLatLng) / 1000.0
+
+            // Update the fucking bottom sheet
+            destination_text.text = destination.text()
+            distance_text.text = getString(R.string.
+                format_distance_km, distanceInKilometers)
+            bottom_sheet_header.visibility = View.VISIBLE
+        }
     }
 
     /** Enables location component, must be called after
@@ -171,12 +200,39 @@ class MapFragment : Fragment(),
         result?.lastLocation?.run {
             map.locationComponent.forceLocationUpdate(this)
 
-            // Update initial camera position and zooming
-            if (isInitialLocationFound.not()) {
+            // If current location is not initialize,
+            // run this block for the first time
+            if (::currentLocation.isInitialized.not()) {
+                currentLocation = this
+
+                // Update initial camera position and zooming
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     LatLng(latitude, longitude), 12.0))
-                isInitialLocationFound = true
+
+                val options = PlaceOptions.builder()
+                    .backgroundColor(ContextCompat.getColor(context!!,
+                        R.color.colorAutocompleteBackground))
+                    .proximity(Point.fromLngLat(longitude, latitude))
+                    .build(PlaceOptions.MODE_CARDS)
+
+                // Create intent for autocomplete
+                autocomplete = PlaceAutocomplete.IntentBuilder()
+                    .accessToken(BuildConfig.MapboxApiKey)
+                    .placeOptions(options)
+                    .build(activity)
+
+                // Set up fab to open PlaceAutocomplete activity on click
+                with(navigate_fab){
+                    setOnClickListener {
+                        startActivityForResult(autocomplete, REQUEST_AUTOCOMPLETE)
+                    }
+
+                    // Show fab, cuz it's fucking ready
+                    show()
+                }
             }
+
+
         }
     }
 
@@ -229,8 +285,8 @@ class MapFragment : Fragment(),
         private const val DEFAULT_INTERVAL_MS = 2000L
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
 
+        // For intent stuff
         internal const val REQUEST_AUTOCOMPLETE = 420
-
     }
 
 }
