@@ -31,6 +31,7 @@ import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import kotlinx.android.synthetic.main.map_fragment.*
 import timber.log.Timber
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import java.lang.Exception
 
 @SuppressLint("MissingPermission")
@@ -56,9 +57,11 @@ class MapFragment : Fragment(),
     /** Intent used to search places (reverse geocoding). */
     private lateinit var autocomplete: Intent
 
-    /** Autocomplete result as a CarmenFeature object (idk why the class name is like that)
-     * NOTE: Always check if isInitialized cuz it might break */
-    private lateinit var destination: CarmenFeature
+    /** Autocomplete results as a CarmenFeature list (idk why the class name is like that)
+     * WARNING: I GOT A FEELING THAT I MIGHT BE USING A
+     * QUEUE DATA STRUCTURE HERE BUT STILL NOT SURE THO
+     * NOTE: Always check if populated cuz it might break */
+    private val destinations = arrayListOf<CarmenFeature>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +85,7 @@ class MapFragment : Fragment(),
 
         // Initially hide fab, it ain't ready yet
         add_destination_fab.hide()
+        navigate_fab.hide()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -89,9 +93,12 @@ class MapFragment : Fragment(),
 
         if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
             // Extract results from intent
-            destination = PlaceAutocomplete.getPlace(data)
+            val destination = PlaceAutocomplete.getPlace(data)
+            destinations.add(destination)
 
             // Extract latLng from feature
+            // TODO Update this to get distance route
+            //  instead of point to point
             val destLatLng = LatLng(
                 (destination.geometry() as Point).latitude(),
                 (destination.geometry() as Point).longitude())
@@ -105,6 +112,25 @@ class MapFragment : Fragment(),
             distance_text.text = getString(R.string.
                 format_distance_km, distanceInKilometers)
             bottom_sheet_header.visibility = View.VISIBLE
+            with(navigate_fab) {
+                // Show navigate button cuz
+                // it's finally fucking usable as of nw
+                show()
+
+                // Check if destinations has one
+                // (means first run) else run showcase
+                if (destinations.size == 1)
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(this)
+                        .setContentText(R.string.msg_showcase_add_destination)
+                        .setDismissText(R.string.action_showcase_done)
+                        .setDismissTextColor(
+                            ContextCompat.getColor(
+                                context, R.color.colorPrimary))
+                        // Works with bottom sheet
+                        .renderOverNavigationBar()
+                        .show()
+            }
         }
     }
 
@@ -228,9 +254,19 @@ class MapFragment : Fragment(),
 
                     // Show fab, cuz it's fucking ready
                     show()
+
+                    // Run spotlight
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(this)
+                        .setContentText(R.string.msg_showcase_add_destination)
+                        .setDismissText(R.string.action_showcase_done)
+                        .setDismissTextColor(ContextCompat.getColor(
+                            context, R.color.colorPrimary))
+                        // Works with bottom sheet
+                        .renderOverNavigationBar()
+                        .show()
                 }
 
-                // Start showcase
             }
         }
     }
