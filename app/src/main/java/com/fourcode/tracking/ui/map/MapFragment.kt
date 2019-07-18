@@ -1,6 +1,7 @@
 package com.fourcode.tracking.ui.map
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -21,6 +22,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import kotlinx.android.synthetic.main.map_fragment.*
 import timber.log.Timber
 import java.lang.Exception
@@ -46,6 +48,9 @@ class MapFragment : Fragment(),
      * this is used for camera position and zooming */
     private var isInitialLocationFound = false
 
+    /** Intent used to search places (reverse geocoding). */
+    private lateinit var autocomplete: Intent
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Mapbox access token is configured here, null check with context
@@ -64,7 +69,13 @@ class MapFragment : Fragment(),
 
         // Initialize mapView (kotlin synthetic object)
         map_view.onCreate(savedInstanceState)
+
         map_view.getMapAsync(this)
+
+        // Create intent for autocomplete
+        autocomplete = PlaceAutocomplete.IntentBuilder()
+            .accessToken(BuildConfig.MapboxApiKey)
+            .build(activity)
     }
 
     /** Enables location component, must be called after
@@ -106,7 +117,6 @@ class MapFragment : Fragment(),
                         this, context.mainLooper
                     )
                 }
-
             Timber.i("Initialized location engine")
         }
     }
