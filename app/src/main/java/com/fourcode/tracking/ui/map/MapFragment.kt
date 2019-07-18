@@ -122,7 +122,7 @@ class MapFragment : Fragment(),
                 if (destinations.size == 1)
                     MaterialShowcaseView.Builder(activity)
                         .setTarget(this)
-                        .setContentText(R.string.msg_showcase_add_destination)
+                        .setContentText(R.string.msg_showcase_start_navigation)
                         .setDismissText(R.string.action_showcase_done)
                         .setDismissTextColor(
                             ContextCompat.getColor(
