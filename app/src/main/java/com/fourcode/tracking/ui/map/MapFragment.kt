@@ -81,7 +81,7 @@ class MapFragment : Fragment(),
         map_view.getMapAsync(this)
 
         // Initially hide fab, it ain't ready yet
-        navigate_fab.hide()
+        add_destination_fab.hide()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -209,20 +209,19 @@ class MapFragment : Fragment(),
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     LatLng(latitude, longitude), 12.0))
 
+                // Create intent for autocomplete
                 val options = PlaceOptions.builder()
                     .backgroundColor(ContextCompat.getColor(context!!,
                         R.color.colorAutocompleteBackground))
                     .proximity(Point.fromLngLat(longitude, latitude))
                     .build(PlaceOptions.MODE_CARDS)
-
-                // Create intent for autocomplete
                 autocomplete = PlaceAutocomplete.IntentBuilder()
                     .accessToken(BuildConfig.MapboxApiKey)
                     .placeOptions(options)
                     .build(activity)
 
                 // Set up fab to open PlaceAutocomplete activity on click
-                with(navigate_fab){
+                with(add_destination_fab) {
                     setOnClickListener {
                         startActivityForResult(autocomplete, REQUEST_AUTOCOMPLETE)
                     }
@@ -230,9 +229,9 @@ class MapFragment : Fragment(),
                     // Show fab, cuz it's fucking ready
                     show()
                 }
+
+                // Start showcase
             }
-
-
         }
     }
 
@@ -288,5 +287,4 @@ class MapFragment : Fragment(),
         // For intent stuff
         internal const val REQUEST_AUTOCOMPLETE = 420
     }
-
 }

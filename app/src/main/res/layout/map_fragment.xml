@@ -13,7 +13,7 @@
             android:layout_height="match_parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/navigate_fab"
+            android:id="@+id/add_destination_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:fabCustomSize="@dimen/map_navigate_fab_size"
@@ -21,6 +21,17 @@
             android:layout_margin="12dp"
             app:layout_anchor="@id/bottom_sheet_card"
             app:layout_anchorGravity="top|end"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/navigate_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_directions_white_24dp"
+            android:layout_gravity="top|end"
+            app:fabCustomSize="@dimen/map_navigate_fab_size"
+            app:useCompatPadding="true"
+            app:layout_anchor="@+id/add_destination_fab"
+            app:layout_anchorGravity="top"/>
 
     <androidx.cardview.widget.CardView
             android:id="@+id/bottom_sheet_card"
