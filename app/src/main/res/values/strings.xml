@@ -1,10 +1,20 @@
 <resources>
     <string name="app_name">Tracking</string>
-    <string name="msg_location_permissions_needed">This app needs location permissions to continue.</string>
-    <string name="action_retry">Retry</string>
+
+    <!-- MapFragment strings -->
+    <string name="msg_location_permissions_needed">
+        This app needs location permissions to continue.
+    </string>
     <string name="msg_loading">Loading</string>
-    <string name="format_distance_km">%.2f km</string>
+    <string name="action_retry">Retry</string>
+
     <string name="msg_showcase_add_destination">Add a destination</string>
     <string name="msg_showcase_start_navigation">Start navigation when ready</string>
     <string name="action_showcase_done">GOT IT!</string>
+
+    <string name="error_no_routes">No routes found.</string>
+    <string name="error_failed_fetching_routes">Failed fetching routes.</string>
+
+    <string name="format_distance_km">%.2f km</string>
+
 </resources>

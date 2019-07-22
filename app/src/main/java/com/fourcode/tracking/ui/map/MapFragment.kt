@@ -5,14 +5,15 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
-import com.google.android.material.snackbar.Snackbar
+
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -22,17 +23,18 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
-import com.mapbox.mapboxsdk.location.modes.RenderMode
+import com.mapbox.mapboxsdk.location.modes.*
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
+
 import kotlinx.android.synthetic.main.map_fragment.*
+
 import timber.log.Timber
+import com.google.android.material.snackbar.Snackbar
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
-import java.lang.Exception
 
 @SuppressLint("MissingPermission")
 class MapFragment : Fragment(),
@@ -90,7 +92,6 @@ class MapFragment : Fragment(),
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
             // Extract results from intent
             val destination = PlaceAutocomplete.getPlace(data)
@@ -220,7 +221,7 @@ class MapFragment : Fragment(),
         if (granted) initializeLocationEngine()
     }
 
-    /** LocationEngineCallbaack methods. Method name explains it. */
+    /** LocationEngineCallbaack method. Method name explains it. */
     override fun onSuccess(result: LocationEngineResult?) {
         // Update location component with new location
         result?.lastLocation?.run {
@@ -271,7 +272,7 @@ class MapFragment : Fragment(),
         }
     }
 
-    /** LocationEngineCallbaack methods. Method name explains it. */
+    /** LocationEngineCallbaack method. Method name explains it. */
     override fun onFailure(exception: Exception) {
         Timber.w(exception,"Failed retrieving location")
     }
