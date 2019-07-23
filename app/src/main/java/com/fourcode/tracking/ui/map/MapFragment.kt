@@ -1,15 +1,17 @@
 package com.fourcode.tracking.ui.map
 
+
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
@@ -17,8 +19,6 @@ import com.fourcode.tracking.R
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.api.geocoding.v5.models.CarmenFeature
-import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -28,12 +28,13 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
-import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 
 import kotlinx.android.synthetic.main.map_fragment.*
 
 import timber.log.Timber
 import com.google.android.material.snackbar.Snackbar
+import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 
 @SuppressLint("MissingPermission")
@@ -53,22 +54,28 @@ class MapFragment : Fragment(),
      * which might be needed for navigation  */
     private lateinit var engine: LocationEngine
 
-    /** Current updated position will be saved here. */
-    private lateinit var currentLocation: Location
-
     /** Intent used to search places (reverse geocoding). */
     private lateinit var autocomplete: Intent
 
-    /** Autocomplete results as a CarmenFeature list (idk why the class name is like that)
-     * WARNING: I GOT A FEELING THAT I MIGHT BE USING A
-     * QUEUE DATA STRUCTURE HERE BUT STILL NOT SURE THO
-     * NOTE: Always check if populated cuz it might break */
-    private val destinations = arrayListOf<CarmenFeature>()
+    /** ViewModel object (will implement Android Architecture components) */
+    private lateinit var model: MapViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Mapbox access token is configured here, null check with context
         context?.let {  Mapbox.getInstance(it, BuildConfig.MapboxApiKey) }
+
+        // Initialize map's ViewModel
+        model = ViewModelProviders.of(this)[MapViewModel::class.java]
+
+        // Start listening for updates
+        model.location.observe(this, Observer {
+            map.locationComponent.forceLocationUpdate(it)
+        })
+
+        model.destinations.observe(this, Observer {
+            Timber.i(it.toString())
+        })
     }
 
     override fun onCreateView(
@@ -90,54 +97,36 @@ class MapFragment : Fragment(),
         navigate_fab.hide()
     }
 
+    /** Will run when a place got picked from autocomplete*/
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
-            // Extract results from intent
-            val destination = PlaceAutocomplete.getPlace(data)
-            destinations.add(destination)
+           model.destinations.value?.add(PlaceAutocomplete.getPlace(data))
+        }
+    }
 
-            // Extract latLng from feature
-            // TODO Update this to get distance route
-            //  instead of point to point
-            val destLatLng = LatLng(
-                (destination.geometry() as Point).latitude(),
-                (destination.geometry() as Point).longitude())
-            val currentLatLng = LatLng(currentLocation)
-
-            // Calculate distance between two latLng (in meters)
-            val distanceInKilometers = currentLatLng.distanceTo(destLatLng) / 1000.0
-
-            // Update the fucking bottom sheet
-            destination_text.text = destination.text()
-            distance_text.text = getString(R.string.
-                format_distance_km, distanceInKilometers)
-            bottom_sheet_header.visibility = View.VISIBLE
-            with(navigate_fab) {
-                // Show navigate button cuz
-                // it's finally fucking usable as of nw
-                show()
-
-                // Check if destinations has one
-                // (means first run) else run showcase
-                if (destinations.size == 1)
-                    MaterialShowcaseView.Builder(activity)
-                        .setTarget(this)
-                        .setContentText(R.string.msg_showcase_start_navigation)
-                        .setDismissText(R.string.action_showcase_done)
-                        .setDismissTextColor(
-                            ContextCompat.getColor(
-                                context, R.color.colorPrimary))
-                        // Works with bottom sheet
-                        .renderOverNavigationBar()
-                        .show()
+    /** Callback function for MapView.getAsync().
+     * Runs after Mapview is initialized. */
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        // Set a style then enable location component
+        mapboxMap.apply {
+            // Initialize map and set style
+            map = this; setStyle(Style.TRAFFIC_DAY) {
+            // Check if permissions are granted
+            if (PermissionsManager.areLocationPermissionsGranted(context)) {
+                initializeMapComponents(it)
+                initializeLocationEngine()
+            } else {
+                permissions = PermissionsManager(this@MapFragment)
+                permissions.requestLocationPermissions(activity)
             }
+        }
         }
     }
 
     /** Enables location component, must be called after
      * style is loaded and permissions are granted */
-    private fun initializeLocationComponent(style: Style) {
+    private fun initializeMapComponents(style: Style) {
         context?.let {context ->
             with(map.locationComponent) {
                 // Activate location component with the following options
@@ -178,25 +167,8 @@ class MapFragment : Fragment(),
         }
     }
 
-    /** Callback function for MapView.getAsync(). Runs after Mapview is initialized. */
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        // Set a style then enable location component
-        mapboxMap.apply {
-            // Initialize map and set style
-            map = this; setStyle(Style.TRAFFIC_DAY) {
-                // Check if permissions are granted
-                if (PermissionsManager.areLocationPermissionsGranted(context)) {
-                    initializeLocationComponent(it)
-                    initializeLocationEngine()
-                } else {
-                    permissions = PermissionsManager(this@MapFragment)
-                    permissions.requestLocationPermissions(activity)
-                }
-            }
-        }
-    }
-
-    /** Android Permission callback, will be run after user interacts with permission dialog. */
+    /** Android Permission callback, will be run
+     * after user interacts with permission dialog. */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -223,20 +195,18 @@ class MapFragment : Fragment(),
 
     /** LocationEngineCallbaack method. Method name explains it. */
     override fun onSuccess(result: LocationEngineResult?) {
-        // Update location component with new location
         result?.lastLocation?.run {
-            map.locationComponent.forceLocationUpdate(this)
-
-            // If current location is not initialize,
-            // run this block for the first time
-            if (::currentLocation.isInitialized.not()) {
-                currentLocation = this
+            // Will initialize stuff once location is found
+            // NOTE: Should only run once
+            if (model.location.value == null) {
+                model.location.value = this
 
                 // Update initial camera position and zooming
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    LatLng(latitude, longitude), 12.0))
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(latitude, longitude), 12.0))
 
-                // Create intent for autocomplete
+                // Build intent for autocomplete
                 val options = PlaceOptions.builder()
                     .backgroundColor(ContextCompat.getColor(context!!,
                         R.color.colorAutocompleteBackground))
@@ -261,13 +231,12 @@ class MapFragment : Fragment(),
                         .setTarget(this)
                         .setContentText(R.string.msg_showcase_add_destination)
                         .setDismissText(R.string.action_showcase_done)
-                        .setDismissTextColor(ContextCompat.getColor(
-                            context, R.color.colorPrimary))
+                        .setDismissTextColor(ContextCompat.
+                            getColor(context, R.color.colorPrimary))
                         // Works with bottom sheet
                         .renderOverNavigationBar()
                         .show()
                 }
-
             }
         }
     }
