@@ -59,7 +59,7 @@ class MapFragment : Fragment(),
     private lateinit var autocomplete: Intent
 
     /** Adapter for destinations_recycler_view, will pull out data from here*/
-    private val adapter = DestinationsAdapter(arrayListOf())
+    private lateinit var adapter: DestinationsAdapter
 
     /** ViewModel object (will implement Android Architecture components) */
     private lateinit var model: MapViewModel
@@ -85,8 +85,19 @@ class MapFragment : Fragment(),
 
             // Will run once items has been populated
             if (adapter.items.size == 1) {
-                navigate_fab.show()
                 destinations_title.setText(R.string.title_destinations)
+                navigate_fab.show()
+
+                // Run spotlight
+                MaterialShowcaseView.Builder(activity)
+                    .setTarget(navigate_fab)
+                    .setContentText(R.string.msg_showcase_start_navigation)
+                    .setDismissText(R.string.action_showcase_done)
+                    .setDismissTextColor(ContextCompat.
+                        getColor(context!!, R.color.colorPrimaryDark))
+                    // Works with bottom sheet
+                    .renderOverNavigationBar()
+                    .show()
             }
 
         })
@@ -109,7 +120,6 @@ class MapFragment : Fragment(),
         // Intiialize RecyclerView
         with(destinations_recycler_view) {
             layoutManager = LinearLayoutManager(context)
-            adapter = this@MapFragment.adapter
         }
 
         // Initially hide fab, it ain't ready yet
@@ -129,9 +139,9 @@ class MapFragment : Fragment(),
      * Runs after Mapview is initialized. */
     override fun onMapReady(mapboxMap: MapboxMap) {
         // Set a style then enable location component
-        mapboxMap.apply {
+        map = mapboxMap.apply {
             // Initialize map and set style
-                map = this; setStyle(Style.TRAFFIC_DAY) {
+                setStyle(Style.TRAFFIC_DAY) {
                 // Check if permissions are granted
                 if (PermissionsManager.areLocationPermissionsGranted(context)) {
                     initializeMapComponents(it)
@@ -142,6 +152,10 @@ class MapFragment : Fragment(),
                 }
             }
         }
+
+        // Initialize adapter for recycler view
+        adapter = DestinationsAdapter(arrayListOf(), map)
+        destinations_recycler_view.adapter = adapter
     }
 
     /** Enables location component, must be called after
@@ -216,6 +230,7 @@ class MapFragment : Fragment(),
     /** LocationEngineCallbaack method. Method name explains it. */
     override fun onSuccess(result: LocationEngineResult?) {
         result?.lastLocation?.run {
+
             // Will initialize stuff once location is found
             // NOTE: Should only run once
             if (model.location.value == null) {
@@ -252,7 +267,7 @@ class MapFragment : Fragment(),
                         .setContentText(R.string.msg_showcase_add_destination)
                         .setDismissText(R.string.action_showcase_done)
                         .setDismissTextColor(ContextCompat.
-                            getColor(context, R.color.colorPrimary))
+                            getColor(context, R.color.colorPrimaryDark))
                         // Works with bottom sheet
                         .renderOverNavigationBar()
                         .show()

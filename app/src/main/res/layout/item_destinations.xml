@@ -11,6 +11,7 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
+        android:id="@+id/card_view"
         tools:ignore="ContentDescription">
 
     <LinearLayout
