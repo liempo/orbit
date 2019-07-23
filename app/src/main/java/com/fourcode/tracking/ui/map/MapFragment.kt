@@ -34,14 +34,21 @@ import kotlinx.android.synthetic.main.map_fragment.*
 
 import timber.log.Timber
 import com.google.android.material.snackbar.Snackbar
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.MapboxDirections
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 
 @SuppressLint("MissingPermission")
 class MapFragment : Fragment(),
     OnMapReadyCallback, PermissionsListener,
-    LocationEngineCallback<LocationEngineResult> {
+    LocationEngineCallback<LocationEngineResult>,
+            Callback<DirectionsResponse> {
 
     /** MapboxMap object to manipulate map elements
      * NOTE: Do not confuse with MapView (I use kotlin synthetic with that) */
@@ -77,14 +84,46 @@ class MapFragment : Fragment(),
             map.locationComponent.forceLocationUpdate(it)
         })
 
-        model.destination.observe(this, Observer {
+        model.distance.observe(this, Observer {
+            total_distance_text.text = getString(R.string.format_distance_km, it / 1000)
+        })
 
+        model.duration.observe(this, Observer {
+            total_duration_text.text = getReadableTime(it.toInt())
+        })
+
+        model.destination.observe(this, Observer {
             // Add item to adapters and update UI
             adapter.items.add(it)
             adapter.notifyDataSetChanged()
 
+            // Fetch directions if location is not null
+            model.location.value?.run {
+
+                // Request directions from mapbox
+                val builder = MapboxDirections.builder()
+                    .accessToken(BuildConfig.MapboxApiKey)
+                    .origin(Point.fromLngLat(longitude, latitude))
+                    .overview(DirectionsCriteria.OVERVIEW_FULL)
+                    .profile(DirectionsCriteria.PROFILE_DRIVING)
+
+                adapter.items.forEachIndexed { index, item ->
+                    // Extract point
+                    val point = item.center()!!
+
+                    // Check if item is the lastIndex
+                    if (adapter.items.lastIndex == index)
+                        builder.destination(point)
+                    else builder.addWaypoint(point)
+                }
+
+                // Call to API
+                builder.build().enqueueCall(this@MapFragment)
+            }
+
             // Will run once items has been populated
             if (adapter.items.size == 1) {
+                bottom_sheet_header.visibility = View.VISIBLE
                 destinations_title.setText(R.string.title_destinations)
                 navigate_fab.show()
 
@@ -227,7 +266,7 @@ class MapFragment : Fragment(),
         if (granted) initializeLocationEngine()
     }
 
-    /** LocationEngineCallbaack method. Method name explains it. */
+    /** LocationEngineCallbaack method  */
     override fun onSuccess(result: LocationEngineResult?) {
         result?.lastLocation?.run {
 
@@ -276,9 +315,24 @@ class MapFragment : Fragment(),
         }
     }
 
-    /** LocationEngineCallbaack method. Method name explains it. */
+    /** LocationEngineCallbaack method  */
     override fun onFailure(exception: Exception) {
         Timber.w(exception,"Failed retrieving location")
+    }
+
+    /** Mapbox Matrix API callback method */
+    override fun onResponse(call: Call<DirectionsResponse>, response: Response<DirectionsResponse>) {
+        val directions = response.body()!!
+        val route = directions.routes()[0]
+
+        // Update ViewModel
+        model.duration.value = route.duration()!!
+        model.distance.value = route.distance()!!
+    }
+
+    /** Mapbox Matrix API callback method */
+    override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+
     }
 
     override fun onStart() {
@@ -327,5 +381,17 @@ class MapFragment : Fragment(),
 
         // For intent stuff
         internal const val REQUEST_AUTOCOMPLETE = 420
+
+        private fun getReadableTime(totalSeconds: Int): String {
+
+            val minutesInHour = 60
+            val secondsInMinute = 60
+
+            val totalMinutes = totalSeconds / secondsInMinute
+            val minutes = totalMinutes % minutesInHour
+            val hours = totalMinutes / minutesInHour
+
+            return "${hours}h ${minutes}m"
+        }
     }
 }

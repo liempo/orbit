@@ -59,8 +59,8 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                        tools:text="Maunong"
-                        android:id="@+id/destination_text"
+                        tools:text="420.69 km"
+                        android:id="@+id/total_distance_text"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/msg_loading"
@@ -69,19 +69,19 @@
                         android:gravity="center"
                         android:layout_marginEnd="@dimen/sheet_header_details_margine_end"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        android:drawableStart="@drawable/ic_place_primary_24dp"
+                        android:drawableStart="@drawable/ic_directions_primary_24dp"
                         android:drawablePadding="@dimen/sheet_header_drawable_padding"/>
 
                 <TextView
-                        tools:text="429.69 km"
-                        android:id="@+id/distance_text"
+                        tools:text="11h 24m"
+                        android:id="@+id/total_duration_text"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/msg_loading"
                         android:gravity="center"
                         android:layout_marginEnd="@dimen/sheet_header_details_margine_end"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        android:drawableStart="@drawable/ic_directions_primary_24dp"
+                        android:drawableStart="@drawable/ic_access_time_primary_24dp"
                         android:drawablePadding="@dimen/sheet_header_drawable_padding"/>
 
             </LinearLayout>
