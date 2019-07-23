@@ -38,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-            app:behavior_peekHeight="@dimen/map_bottom_sheet_peek_height">
+            app:behavior_peekHeight="@dimen/sheet_peek_height">
 
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -48,9 +48,9 @@
             <LinearLayout
                     android:id="@+id/bottom_sheet_header"
                     android:layout_width="0dp"
-                    android:layout_height="@dimen/map_bottom_sheet_peek_height"
-                    android:layout_marginEnd="@dimen/map_bottom_sheet_header_margin_end"
-                    android:padding="@dimen/map_bottom_sheet_header_padding"
+                    android:layout_height="@dimen/sheet_peek_height"
+                    android:layout_marginEnd="@dimen/sheet_header_margin_end"
+                    android:padding="@dimen/sheet_header_padding"
                     android:orientation="horizontal"
                     android:visibility="invisible"
                     tools:visibility="visible"
@@ -67,10 +67,10 @@
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:gravity="center"
-                        android:layout_marginEnd="@dimen/map_bottom_sheet_header_details_margine_end"
+                        android:layout_marginEnd="@dimen/sheet_header_details_margine_end"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         android:drawableStart="@drawable/ic_place_primary_24dp"
-                        android:drawablePadding="@dimen/map_bottom_sheet_header_drawable_padding"/>
+                        android:drawablePadding="@dimen/sheet_header_drawable_padding"/>
 
                 <TextView
                         tools:text="429.69 km"
@@ -79,10 +79,10 @@
                         android:layout_height="match_parent"
                         android:text="@string/msg_loading"
                         android:gravity="center"
-                        android:layout_marginEnd="@dimen/map_bottom_sheet_header_details_margine_end"
+                        android:layout_marginEnd="@dimen/sheet_header_details_margine_end"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         android:drawableStart="@drawable/ic_directions_primary_24dp"
-                        android:drawablePadding="@dimen/map_bottom_sheet_header_drawable_padding"/>
+                        android:drawablePadding="@dimen/sheet_header_drawable_padding"/>
 
             </LinearLayout>
 
