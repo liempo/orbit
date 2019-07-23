@@ -10,6 +10,6 @@ class MapViewModel: ViewModel() {
     /** Current updated position will be saved here. */
     val location: MutableLiveData<Location> = MutableLiveData()
 
-    /** List of destinations set*/
-    val destinations: MutableLiveData<ArrayList<CarmenFeature>> = MutableLiveData()
+    /** List of destination set*/
+    val destination: MutableLiveData<CarmenFeature> = MutableLiveData()
 }

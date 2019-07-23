@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
@@ -57,6 +58,9 @@ class MapFragment : Fragment(),
     /** Intent used to search places (reverse geocoding). */
     private lateinit var autocomplete: Intent
 
+    /** Adapter for destinations_recycler_view, will pull out data from here*/
+    private val adapter = DestinationsAdapter(arrayListOf())
+
     /** ViewModel object (will implement Android Architecture components) */
     private lateinit var model: MapViewModel
 
@@ -73,8 +77,9 @@ class MapFragment : Fragment(),
             map.locationComponent.forceLocationUpdate(it)
         })
 
-        model.destinations.observe(this, Observer {
-            Timber.i(it.toString())
+        model.destination.observe(this, Observer {
+            adapter.items.add(it)
+            adapter.notifyDataSetChanged()
         })
     }
 
@@ -92,6 +97,12 @@ class MapFragment : Fragment(),
         map_view.onCreate(savedInstanceState)
         map_view.getMapAsync(this)
 
+        // Intiialize RecyclerView
+        with(destinations_recycler_view) {
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@MapFragment.adapter
+        }
+
         // Initially hide fab, it ain't ready yet
         add_destination_fab.hide()
         navigate_fab.hide()
@@ -101,7 +112,7 @@ class MapFragment : Fragment(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
-           model.destinations.value?.add(PlaceAutocomplete.getPlace(data))
+           model.destination.value = PlaceAutocomplete.getPlace(data)
         }
     }
 
@@ -111,16 +122,16 @@ class MapFragment : Fragment(),
         // Set a style then enable location component
         mapboxMap.apply {
             // Initialize map and set style
-            map = this; setStyle(Style.TRAFFIC_DAY) {
-            // Check if permissions are granted
-            if (PermissionsManager.areLocationPermissionsGranted(context)) {
-                initializeMapComponents(it)
-                initializeLocationEngine()
-            } else {
-                permissions = PermissionsManager(this@MapFragment)
-                permissions.requestLocationPermissions(activity)
+                map = this; setStyle(Style.TRAFFIC_DAY) {
+                // Check if permissions are granted
+                if (PermissionsManager.areLocationPermissionsGranted(context)) {
+                    initializeMapComponents(it)
+                    initializeLocationEngine()
+                } else {
+                    permissions = PermissionsManager(this@MapFragment)
+                    permissions.requestLocationPermissions(activity)
+                }
             }
-        }
         }
     }
 
