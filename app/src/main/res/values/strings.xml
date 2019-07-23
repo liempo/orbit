@@ -15,7 +15,8 @@
     <string name="error_no_routes">No routes found.</string>
     <string name="error_failed_fetching_routes">Failed fetching routes.</string>
 
-    <string name="format_distance_km">%.2f km</string>
+    <string name="format_distance_kilometers">%.2f km</string>
+    <string name="format_distance_meters">%.2f m</string>
     <string name="title_destinations_empty">Please add destinations</string>
     <string name="title_destinations">Destinations</string>
 

@@ -85,7 +85,11 @@ class MapFragment : Fragment(),
         })
 
         model.distance.observe(this, Observer {
-            total_distance_text.text = getString(R.string.format_distance_km, it / 1000)
+            val value =
+                if (it >= 1000)
+                    getString(R.string.format_distance_kilometers, it / 1000)
+                else getString(R.string.format_distance_meters, it)
+            total_distance_text.text = value
         })
 
         model.duration.observe(this, Observer {
@@ -391,7 +395,7 @@ class MapFragment : Fragment(),
             val minutes = totalMinutes % minutesInHour
             val hours = totalMinutes / minutesInHour
 
-            return "${hours}h ${minutes}m"
+            return if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
         }
     }
 }
