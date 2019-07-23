@@ -78,8 +78,17 @@ class MapFragment : Fragment(),
         })
 
         model.destination.observe(this, Observer {
+
+            // Add item to adapters and update UI
             adapter.items.add(it)
             adapter.notifyDataSetChanged()
+
+            // Will run once items has been populated
+            if (adapter.items.size == 1) {
+                navigate_fab.show()
+                destinations_title.setText(R.string.title_destinations)
+            }
+
         })
     }
 

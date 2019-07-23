@@ -90,7 +90,7 @@
                     android:id="@+id/destinations_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_destinations"
+                    android:text="@string/title_destinations_empty"
                     android:layout_margin="8dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                     app:layout_constraintStart_toStartOf="parent"
@@ -104,10 +104,12 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginTop="12dp"
-                    android:layout_marginBottom="24dp"
+                    android:paddingBottom="24dp"
+                    android:clipToPadding="false"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/destinations_title"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     tools:listitem="@layout/item_destinations"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
