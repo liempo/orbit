@@ -4,6 +4,7 @@ package com.fourcode.tracking.ui.map
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
@@ -29,19 +31,23 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
-
-import kotlinx.android.synthetic.main.map_fragment.*
-
-import timber.log.Timber
-import com.google.android.material.snackbar.Snackbar
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.geojson.Point
+import com.mapbox.core.constants.Constants.PRECISION_6
+import com.mapbox.geojson.*
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
+import com.mapbox.mapboxsdk.style.layers.LineLayer
+import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+
+import kotlinx.android.synthetic.main.map_fragment.*
+
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 
 @SuppressLint("MissingPermission")
@@ -205,6 +211,8 @@ class MapFragment : Fragment(),
      * style is loaded and permissions are granted */
     private fun initializeMapComponents(style: Style) {
         context?.let {context ->
+
+            // Initialize location component
             with(map.locationComponent) {
                 // Activate location component with the following options
                 activateLocationComponent(
@@ -220,6 +228,19 @@ class MapFragment : Fragment(),
 
                 Timber.i("Initialized location component")
             }
+
+            // Initialize route source
+            style.addSource(GeoJsonSource(ROUTE_SOURCE_ID,
+                FeatureCollection.fromFeatures(arrayOf())))
+
+            // Add route layer to style
+            style.addLayer(LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
+                lineCap(Property.LINE_CAP_ROUND),
+                lineJoin(Property.LINE_JOIN_ROUND),
+                lineWidth(5f),
+                lineColor(Color.parseColor("#009688"))
+            ))
+
         }
     }
 
@@ -332,6 +353,18 @@ class MapFragment : Fragment(),
         // Update ViewModel
         model.duration.value = route.duration()!!
         model.distance.value = route.distance()!!
+
+        // Convert geometry to map feature
+        val feature = Feature.fromGeometry(LineString.
+            fromPolyline(route.geometry()!!, PRECISION_6))
+
+        map.style?.let {
+            if (it.isFullyLoaded)
+                // Get route source
+                (it.getSource(ROUTE_SOURCE_ID) as GeoJsonSource)
+                    .setGeoJson(feature)
+        }
+
     }
 
     /** Mapbox Matrix API callback method */
@@ -382,6 +415,10 @@ class MapFragment : Fragment(),
         // Location update variables
         private const val DEFAULT_INTERVAL_MS = 2000L
         private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
+
+        // Mapbox style source
+        private const val ROUTE_LAYER_ID = "route_layer"
+        private const val ROUTE_SOURCE_ID = "route_source"
 
         // For intent stuff
         internal const val REQUEST_AUTOCOMPLETE = 420
