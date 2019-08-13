@@ -36,10 +36,12 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.core.constants.Constants.PRECISION_6
 import com.mapbox.geojson.*
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 
 import kotlinx.android.synthetic.main.map_fragment.*
@@ -102,9 +104,13 @@ class MapFragment : Fragment(),
             total_duration_text.text = getReadableTime(it.toInt())
         })
 
-        model.destination.observe(this, Observer {
+        model.destinations.value = arrayListOf()
+        model.destinations.observe(this, Observer {
+            if (it.isNullOrEmpty())
+                return@Observer
+
             // Add item to adapters and update UI
-            adapter.items.add(it)
+            adapter.items.add(it.last())
             adapter.notifyDataSetChanged()
 
             // Fetch directions if location is not null
@@ -180,7 +186,8 @@ class MapFragment : Fragment(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
-           model.destination.value = PlaceAutocomplete.getPlace(data)
+           model.destinations.value =  model.destinations.value?.
+               plus(PlaceAutocomplete.getPlace(data))
         }
     }
 
@@ -233,12 +240,29 @@ class MapFragment : Fragment(),
             style.addSource(GeoJsonSource(ROUTE_SOURCE_ID,
                 FeatureCollection.fromFeatures(arrayOf())))
 
+            // Initialize route source
+            style.addSource(GeoJsonSource(DEST_SOURCE_ID,
+                FeatureCollection.fromFeatures(arrayOf())))
+
+
             // Add route layer to style
             style.addLayer(LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
                 lineCap(Property.LINE_CAP_ROUND),
                 lineJoin(Property.LINE_JOIN_ROUND),
                 lineWidth(5f),
                 lineColor(Color.parseColor("#009688"))
+            ))
+
+            // Add icon to style
+            style.addImage(DEST_ICON_ID, resources.getDrawable(
+                R.drawable.ic_place_primary_24dp, activity?.theme))
+
+            // Add symbol layer for the dest icon
+            style.addLayer(SymbolLayer(DEST_LAYER_ID, DEST_SOURCE_ID).withProperties(
+                iconImage(DEST_ICON_ID),
+                iconIgnorePlacement(true),
+                iconIgnorePlacement(true),
+                iconOffset(arrayOf(0f, -4f))
             ))
 
         }
@@ -356,17 +380,41 @@ class MapFragment : Fragment(),
         model.distance.value = route.distance()!!
 
         // Convert geometry to map feature
-        val feature = Feature.fromGeometry(LineString.
+        val routeFeature = Feature.fromGeometry(LineString.
             fromPolyline(route.geometry()!!, PRECISION_6))
 
+        val destFeature = Feature.fromGeometry(
+            model.destinations.value?.last()?.center()
+        )
         // Must explicitly compare to true,
         // cuz isFullyLoaded might be null
         if (map.style?.isFullyLoaded == true) {
 
-            // Draw route on source
+            // Change route data
             (map.style?.getSource(ROUTE_SOURCE_ID) as
-                    GeoJsonSource).setGeoJson(feature)
+                    GeoJsonSource).setGeoJson(routeFeature)
 
+            // Change dest data
+            (map.style?.getSource(DEST_SOURCE_ID)
+                    as GeoJsonSource).setGeoJson(destFeature)
+
+
+            // Create a LatLngBounds to be moved to
+            val boundsBuilder = LatLngBounds.Builder()
+
+            // Add current location to LatLng Bounds
+            model.location.value?.let {
+                boundsBuilder.include(LatLng(it.latitude, it.longitude))
+            }
+
+            // Add destination coordinates from recycler view adapter
+            adapter.items.forEach {
+                it.center()?.let {point -> boundsBuilder.
+                    include(LatLng(point.latitude(), point.longitude())) }
+            }
+
+            map.moveCamera(CameraUpdateFactory.
+                newLatLngBounds(boundsBuilder.build(), 500))
         }
 
     }
@@ -423,6 +471,9 @@ class MapFragment : Fragment(),
         // Mapbox style source
         private const val ROUTE_LAYER_ID = "route_layer"
         private const val ROUTE_SOURCE_ID = "route_source"
+        private const val DEST_ICON_ID = "dest_icon_id"
+        private const val DEST_LAYER_ID = "dest_layer_id"
+        private const val DEST_SOURCE_ID = "dest_source_id"
 
         // For intent stuff
         internal const val REQUEST_AUTOCOMPLETE = 420

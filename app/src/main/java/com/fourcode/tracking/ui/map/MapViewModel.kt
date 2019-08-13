@@ -11,8 +11,9 @@ class MapViewModel: ViewModel() {
     val location: MutableLiveData<Location> = MutableLiveData()
 
     /** Recently added destination will be saved here.
-     * A list of destinations will be saved in RecyclerView's adapter*/
-    val destination: MutableLiveData<CarmenFeature> = MutableLiveData()
+     * A list of destinations will be saved in RecyclerView's adapter
+     * TODO: Bind this to recycler view */
+    val destinations: MutableLiveData<List<CarmenFeature>> = MutableLiveData()
 
     /** Total distance of the generated route in meters */
     val distance: MutableLiveData<Double> = MutableLiveData()
