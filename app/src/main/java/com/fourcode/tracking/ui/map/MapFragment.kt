@@ -346,7 +346,8 @@ class MapFragment : Fragment(),
     }
 
     /** Mapbox Matrix API callback method */
-    override fun onResponse(call: Call<DirectionsResponse>, response: Response<DirectionsResponse>) {
+    override fun onResponse(call: Call<DirectionsResponse>,
+                            response: Response<DirectionsResponse>) {
         val directions = response.body()!!
         val route = directions.routes()[0]
 
@@ -358,11 +359,14 @@ class MapFragment : Fragment(),
         val feature = Feature.fromGeometry(LineString.
             fromPolyline(route.geometry()!!, PRECISION_6))
 
-        map.style?.let {
-            if (it.isFullyLoaded)
-                // Get route source
-                (it.getSource(ROUTE_SOURCE_ID) as GeoJsonSource)
-                    .setGeoJson(feature)
+        // Must explicitly compare to true,
+        // cuz isFullyLoaded might be null
+        if (map.style?.isFullyLoaded == true) {
+
+            // Draw route on source
+            (map.style?.getSource(ROUTE_SOURCE_ID) as
+                    GeoJsonSource).setGeoJson(feature)
+
         }
 
     }
