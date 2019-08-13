@@ -6,7 +6,7 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.1"
     defaultConfig {
         applicationId "com.fourcode.tracking"
         minSdkVersion 22
@@ -57,7 +57,7 @@ dependencies {
     // Android livedata component
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-alpha02'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-alpha03'
 
     // Material design component
     implementation 'com.google.android.material:material:1.0.0'
