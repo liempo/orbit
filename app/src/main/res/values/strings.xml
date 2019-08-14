@@ -10,6 +10,7 @@
 
     <string name="msg_showcase_add_destination">Add a destination</string>
     <string name="msg_showcase_start_navigation">Start navigation when ready</string>
+    <string name="msg_already_added">%s is already added on the bottom of the list.</string>
     <string name="action_showcase_done">GOT IT!</string>
 
     <string name="error_no_routes">No routes found.</string>

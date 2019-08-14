@@ -106,55 +106,56 @@ class MapFragment : Fragment(),
 
         model.destinations.value = arrayListOf()
         model.destinations.observe(this, Observer {
-            if (it.isNullOrEmpty())
-                return@Observer
-
-            // Add item to adapters and update UI
-            adapter.items.add(it.last())
-            adapter.notifyDataSetChanged()
-
             // Fetch directions if location is not null
             model.location.value?.run {
 
                 // Request directions from mapbox
                 val builder = MapboxDirections.builder()
                     .accessToken(BuildConfig.MapboxApiKey)
-                    .origin(Point.fromLngLat(longitude, latitude))
                     .overview(DirectionsCriteria.OVERVIEW_FULL)
                     .profile(DirectionsCriteria.PROFILE_DRIVING)
+                    .origin(Point.fromLngLat(longitude, latitude))
 
-                adapter.items.forEachIndexed { index, item ->
-                    // Extract point
+                it.forEachIndexed { index, item ->
                     val point = item.center()!!
 
-                    // Check if item is the lastIndex
-                    if (adapter.items.lastIndex == index)
+                    if (it.lastIndex == index)
                         builder.destination(point)
-                    else builder.addWaypoint(point)
+                    else
+                        builder.addWaypoint(point)
                 }
 
                 // Call to API
                 builder.build().enqueueCall(this@MapFragment)
+
+                // Will run once items has been populated
+                if (it.size == 1) {
+                    bottom_sheet_header.visibility = View.VISIBLE
+                    destinations_title.setText(R.string.title_destinations)
+                    navigate_fab.show()
+
+                    // Run spotlight
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(navigate_fab)
+                        .setContentText(R.string.msg_showcase_start_navigation)
+                        .setDismissText(R.string.action_showcase_done)
+                        .setDismissTextColor(
+                            ContextCompat.getColor(context!!, R.color.colorPrimaryDark)
+                        )
+                        // Works with bottom sheet
+                        .renderOverNavigationBar()
+                        .show()
+                }
+
+                // Add icon to map style
+                val features = it.map { point -> Feature.fromGeometry(point.center()) }
+                (map.style?.getSource(DEST_SOURCE_ID) as GeoJsonSource)
+                    .setGeoJson(FeatureCollection.fromFeatures(features))
+
+                // Add item to adapters and update UI
+                adapter.items.add(it.last())
+                adapter.notifyDataSetChanged()
             }
-
-            // Will run once items has been populated
-            if (adapter.items.size == 1) {
-                bottom_sheet_header.visibility = View.VISIBLE
-                destinations_title.setText(R.string.title_destinations)
-                navigate_fab.show()
-
-                // Run spotlight
-                MaterialShowcaseView.Builder(activity)
-                    .setTarget(navigate_fab)
-                    .setContentText(R.string.msg_showcase_start_navigation)
-                    .setDismissText(R.string.action_showcase_done)
-                    .setDismissTextColor(ContextCompat.
-                        getColor(context!!, R.color.colorPrimaryDark))
-                    // Works with bottom sheet
-                    .renderOverNavigationBar()
-                    .show()
-            }
-
         })
     }
 
@@ -186,8 +187,20 @@ class MapFragment : Fragment(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
-           model.destinations.value =  model.destinations.value?.
-               plus(PlaceAutocomplete.getPlace(data))
+
+            val dest = PlaceAutocomplete.getPlace(data)
+
+            Timber.d("onActivityResult %s", (model.destinations.value.isNullOrEmpty().not() &&
+                    model.destinations.value?.last()?.id() == dest.id()).toString())
+
+            if (model.destinations.value.isNullOrEmpty().not() &&
+                model.destinations.value?.last()?.id() == dest.id())
+                Snackbar.make(map_view,
+                    R.string.msg_already_added,
+                    Snackbar.LENGTH_LONG).show()
+            else
+                model.destinations.value =
+                    model.destinations.value?.plus(dest)
         }
     }
 
@@ -244,7 +257,6 @@ class MapFragment : Fragment(),
             style.addSource(GeoJsonSource(DEST_SOURCE_ID,
                 FeatureCollection.fromFeatures(arrayOf())))
 
-
             // Add route layer to style
             style.addLayer(LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
                 lineCap(Property.LINE_CAP_ROUND),
@@ -264,7 +276,6 @@ class MapFragment : Fragment(),
                 iconIgnorePlacement(true),
                 iconOffset(arrayOf(0f, -4f))
             ))
-
         }
     }
 
@@ -372,32 +383,21 @@ class MapFragment : Fragment(),
     /** Mapbox Matrix API callback method */
     override fun onResponse(call: Call<DirectionsResponse>,
                             response: Response<DirectionsResponse>) {
-        val directions = response.body()!!
-        val route = directions.routes()[0]
+        val route = response.body()!!.routes()[0]
 
         // Update ViewModel
         model.duration.value = route.duration()!!
         model.distance.value = route.distance()!!
 
-        // Convert geometry to map feature
-        val routeFeature = Feature.fromGeometry(LineString.
-            fromPolyline(route.geometry()!!, PRECISION_6))
 
-        val destFeature = Feature.fromGeometry(
-            model.destinations.value?.last()?.center()
-        )
         // Must explicitly compare to true,
         // cuz isFullyLoaded might be null
         if (map.style?.isFullyLoaded == true) {
 
-            // Change route data
+            // Change route data and reset data
             (map.style?.getSource(ROUTE_SOURCE_ID) as
-                    GeoJsonSource).setGeoJson(routeFeature)
-
-            // Change dest data
-            (map.style?.getSource(DEST_SOURCE_ID)
-                    as GeoJsonSource).setGeoJson(destFeature)
-
+                    GeoJsonSource).setGeoJson(FeatureCollection.fromFeature(
+                Feature.fromGeometry(LineString.fromPolyline(route.geometry()!!, PRECISION_6))))
 
             // Create a LatLngBounds to be moved to
             val boundsBuilder = LatLngBounds.Builder()
@@ -414,14 +414,14 @@ class MapFragment : Fragment(),
             }
 
             map.moveCamera(CameraUpdateFactory.
-                newLatLngBounds(boundsBuilder.build(), 500))
+                newLatLngBounds(boundsBuilder.build(), 256))
         }
 
     }
 
     /** Mapbox Matrix API callback method */
     override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-
+        Timber.e(t)
     }
 
     override fun onStart() {
