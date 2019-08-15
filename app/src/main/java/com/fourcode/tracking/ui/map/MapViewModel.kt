@@ -3,6 +3,7 @@ package com.fourcode.tracking.ui.map
 import android.location.Location
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 
 class MapViewModel: ViewModel() {
@@ -15,9 +16,6 @@ class MapViewModel: ViewModel() {
      * TODO: Bind this to recycler view */
     val destinations: MutableLiveData<List<CarmenFeature>> = MutableLiveData()
 
-    /** Total distance of the generated route in meters */
-    val distance: MutableLiveData<Double> = MutableLiveData()
-
-    /** Total duration of the generated route in seconds */
-    val duration: MutableLiveData<Double> = MutableLiveData()
+    /** Contains data about the generated route from Mapbox*/
+    val route: MutableLiveData<DirectionsRoute> = MutableLiveData()
 }

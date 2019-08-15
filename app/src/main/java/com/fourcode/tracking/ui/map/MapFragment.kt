@@ -43,6 +43,8 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions
 
 import kotlinx.android.synthetic.main.map_fragment.*
 
@@ -92,16 +94,21 @@ class MapFragment : Fragment(),
             map.locationComponent.forceLocationUpdate(it)
         })
 
-        model.distance.observe(this, Observer {
-            val value =
-                if (it >= 1000)
-                    getString(R.string.format_distance_kilometers, it / 1000)
-                else getString(R.string.format_distance_meters, it)
-            total_distance_text.text = value
-        })
+        model.route.observe(this, Observer {
 
-        model.duration.observe(this, Observer {
-            total_duration_text.text = getReadableTime(it.toInt())
+            // Update distance if it.distance() does not return null
+            it.distance()?.let { distance ->
+                total_distance_text.text =
+                    if (distance >= 1000)
+                        getString(R.string.format_distance_kilometers, distance / 1000)
+                    else getString(R.string.format_distance_meters, distance)
+            }
+
+            // Update duration if it.duration() does not retunrn null
+            it.duration()?.let { duration ->
+                total_duration_text.text = getReadableTime(duration.toInt())
+            }
+
         })
 
         model.destinations.value = arrayListOf()
@@ -132,19 +139,32 @@ class MapFragment : Fragment(),
                 if (it.size == 1) {
                     bottom_sheet_header.visibility = View.VISIBLE
                     destinations_title.setText(R.string.title_destinations)
-                    navigate_fab.show()
 
-                    // Run spotlight
-                    MaterialShowcaseView.Builder(activity)
-                        .setTarget(navigate_fab)
-                        .setContentText(R.string.msg_showcase_start_navigation)
-                        .setDismissText(R.string.action_showcase_done)
-                        .setDismissTextColor(
-                            ContextCompat.getColor(context!!, R.color.colorPrimaryDark)
-                        )
-                        // Works with bottom sheet
-                        .renderOverNavigationBar()
-                        .show()
+                    with(navigate_fab) {
+
+                        // Start navigation UI onClick
+                        setOnClickListener {
+                            val options = NavigationLauncherOptions.builder()
+                                .directionsRoute(model.route.value)
+                                .shouldSimulateRoute(true)
+                                .build()
+                            NavigationLauncher.startNavigation(activity, options)
+                        }
+
+                        // Show the fab
+                        show()
+
+                        // Run spotlight
+                        MaterialShowcaseView.Builder(activity)
+                            .setTarget(navigate_fab)
+                            .setContentText(R.string.msg_showcase_start_navigation)
+                            .setDismissText(R.string.action_showcase_done)
+                            .setDismissTextColor(ContextCompat
+                                .getColor(context!!, R.color.colorPrimaryDark))
+                            // Works with bottom sheet
+                            .renderOverNavigationBar()
+                            .show()
+                    }
                 }
 
                 // Add icon to map style
@@ -282,20 +302,15 @@ class MapFragment : Fragment(),
     /** Initialize a location engine, and start it */
     private fun initializeLocationEngine() {
         context?.let { context ->
+            val request = // Build a LocationEngineRequest
+                LocationEngineRequest.Builder(DEFAULT_INTERVAL_MS)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                    .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
+                    .build()
             engine = LocationEngineProvider
-                .getBestLocationEngine(context).also {
-                    it.requestLocationUpdates(
-
-                        // Build a LocationEngineRequest
-                        LocationEngineRequest.Builder(DEFAULT_INTERVAL_MS)
-                            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                            .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                            .build(),
-
-                        // Set callback to this class and pass activity's main looper
-                        this, context.mainLooper
-                    )
-                }
+                .getBestLocationEngine(context)
+            engine.requestLocationUpdates(
+                request,this, context.mainLooper)
             Timber.i("Initialized location engine")
         }
     }
@@ -386,9 +401,7 @@ class MapFragment : Fragment(),
         val route = response.body()!!.routes()[0]
 
         // Update ViewModel
-        model.duration.value = route.duration()!!
-        model.distance.value = route.distance()!!
-
+        model.route.value = route
 
         // Must explicitly compare to true,
         // cuz isFullyLoaded might be null
