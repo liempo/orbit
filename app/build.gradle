@@ -41,6 +41,10 @@ android {
             buildConfigField 'String', "MapboxApiKey", MAPBOX_API_KEY
         }
     }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
 }
 
 dependencies {
