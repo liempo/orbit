@@ -121,6 +121,9 @@ class MapFragment : Fragment(),
                     .accessToken(BuildConfig.MapboxApiKey)
                     .overview(DirectionsCriteria.OVERVIEW_FULL)
                     .profile(DirectionsCriteria.PROFILE_DRIVING)
+                    .steps(true)
+                    .bannerInstructions(true)
+                    .voiceInstructions(true)
                     .origin(Point.fromLngLat(longitude, latitude))
 
                 it.forEachIndexed { index, item ->
