@@ -83,4 +83,7 @@ dependencies {
 
     // Spotlight library
     implementation 'com.github.deano2390:MaterialShowcaseView:1.3.4'
+
+    // Socket
+    implementation 'io.github.centrifugal:centrifuge-java:0.0.2'
 }
