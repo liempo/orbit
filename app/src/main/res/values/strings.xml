@@ -5,8 +5,10 @@
     <string name="msg_location_permissions_needed">
         This app needs location permissions to continue.
     </string>
+    <string name="msg_location_is_disabled">Location service is disabled.</string>
     <string name="msg_loading">Loading</string>
     <string name="action_retry">Retry</string>
+    <string name="action_settings">Settings</string>
 
     <string name="msg_showcase_add_destination">Add a destination</string>
     <string name="msg_showcase_start_navigation">Start navigation when ready</string>

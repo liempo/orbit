@@ -3,8 +3,10 @@ package com.fourcode.tracking.ui.map
 
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+
 import com.google.android.material.snackbar.Snackbar
 
 import com.fourcode.tracking.BuildConfig
@@ -161,6 +165,8 @@ class MapFragment : Fragment(),
                         MaterialShowcaseView.Builder(activity)
                             .setTarget(navigate_fab)
                             .setContentText(R.string.msg_showcase_start_navigation)
+                            .setMaskColour(ContextCompat.
+                                getColor(context, R.color.colorPrimaryDark))
                             .setDismissText(R.string.action_showcase_done)
                             .setDismissTextColor(ContextCompat
                                 .getColor(context!!, R.color.colorPrimaryDark))
@@ -236,6 +242,7 @@ class MapFragment : Fragment(),
                 setStyle(Style.TRAFFIC_DAY) {
                 // Check if permissions are granted
                 if (PermissionsManager.areLocationPermissionsGranted(context)) {
+                    checkLocationServices()
                     initializeMapComponents(it)
                     initializeLocationEngine()
                 } else {
@@ -248,6 +255,29 @@ class MapFragment : Fragment(),
         // Initialize adapter for recycler view
         adapter = DestinationsAdapter(arrayListOf(), map)
         destinations_recycler_view.adapter = adapter
+    }
+
+    /** Shows a snackbar if location is disabled. */
+    private fun checkLocationServices() {
+        // Get location manager system service
+        val locationManager = (context?.getSystemService(
+            Context.LOCATION_SERVICE) as LocationManager)
+
+        // Check if gps and network is enabled
+        val isGpsEnabled = locationManager
+            .isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val isNetworkEnabled = locationManager
+            .isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+        // Show snackbar if GPS is not enabled
+        if (isGpsEnabled.not() && isNetworkEnabled.not()) {
+            Snackbar.make(map_view,
+                R.string.msg_location_is_disabled,
+                Snackbar.LENGTH_LONG)
+                .setAction(R.string.action_settings) {
+                    startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS)) }
+                .show()
+        }
     }
 
     /** Enables location component, must be called after
@@ -382,9 +412,11 @@ class MapFragment : Fragment(),
                     MaterialShowcaseView.Builder(activity)
                         .setTarget(this)
                         .setContentText(R.string.msg_showcase_add_destination)
+                        .setMaskColour(ContextCompat.
+                            getColor(context, R.color.colorPrimaryDark))
                         .setDismissText(R.string.action_showcase_done)
                         .setDismissTextColor(ContextCompat.
-                            getColor(context, R.color.colorPrimaryDark))
+                            getColor(context, R.color.colorPrimaryLight))
                         // Works with bottom sheet
                         .renderOverNavigationBar()
                         .show()
