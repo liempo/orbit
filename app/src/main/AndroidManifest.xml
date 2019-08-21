@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.fourcode.tracking">
+<manifest
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.fourcode.tracking">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
@@ -12,6 +13,11 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+        <service
+                android:name=".BroadcastLocationService"
+                android:enabled="false"
+                android:exported="true">
+        </service>
 
         <activity
                 android:name=".MainActivity"
@@ -33,7 +39,6 @@
                         android:scheme="http"/>
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
