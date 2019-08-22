@@ -16,8 +16,9 @@ android {
     }
     buildTypes {
         debug {
-            // Imports MAP_BOX_API_KEY into project from global gradle properties
+            // Imports private strings into project from global gradle properties
             buildConfigField 'String', "MapboxApiKey", MAPBOX_API_KEY
+            buildConfigField 'String', "TrackingApiBaseUrl", TRACKING_API_BASE_URL
         }
 
         release {
@@ -38,6 +39,7 @@ android {
 
             // Imports MAP_BOX_API_KEY into project from global gradle properties
             buildConfigField 'String', "MapboxApiKey", MAPBOX_API_KEY
+            buildConfigField 'String', "TrackingApiBaseUrl", TRACKING_API_BASE_URL
         }
 
         compileOptions {
@@ -67,4 +69,8 @@ dependencies {
 
     // Timber kotlin extension
     implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    // Okhttp3 and json stuff
+    implementation "com.squareup.okhttp3:okhttp:4.1.0"
+    implementation 'com.beust:klaxon:5.0.1'
 }
