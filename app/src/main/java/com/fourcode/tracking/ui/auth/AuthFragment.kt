@@ -11,11 +11,17 @@ import com.beust.klaxon.Klaxon
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
 import kotlinx.android.synthetic.main.auth_fragment.*
-import okhttp3.*
-import timber.log.Timber
-import java.io.IOException
+import kotlinx.coroutines.*
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import kotlin.coroutines.CoroutineContext
 
-class AuthFragment : Fragment(), Callback {
+class AuthFragment : Fragment(), CoroutineScope {
+
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,7 +34,6 @@ class AuthFragment : Fragment(), Callback {
         super.onViewCreated(view, savedInstanceState)
 
         login_button.setOnClickListener {
-
             val username = username_input.text.toString()
             val password = password_input.text.toString()
 
@@ -42,20 +47,43 @@ class AuthFragment : Fragment(), Callback {
             if (password.isBlank()) password_input_layout.error =
                 getString(R.string.error_field_required)
 
-            if (username.isBlank().not() && password.isBlank().not())
-                login(username, password)
+            if (username.isBlank().not() && password.isBlank().not()) launch {
+                // Disable UI components while call
+                username_input_layout.isEnabled = false
+                password_input_layout.isEnabled = false
+                login_button.isEnabled = false
+
+                // Run call and get response with context
+                val response =  login(username, password)
+
+                // Show error if error is not empty
+                if (response.error.isNotEmpty())
+                    Toast.makeText(context,
+                        response.error,
+                        Toast.LENGTH_LONG).show()
+                else findNavController()
+                    .navigate(AuthFragmentDirections
+                        .startMap(response.token, response.id))
+
+                // Enable UI componente
+                username_input_layout.isEnabled = true
+                password_input_layout.isEnabled = true
+                login_button.isEnabled = true
+            }
         }
     }
 
-    private fun login(username: String, password: String) {
+    private suspend fun login(username: String, password: String): LoginResponse {
         // Create an okhttp3
         val client = OkHttpClient()
 
+        // Create request body
         val body = FormBody.Builder()
             .add("username", username)
             .add("password", password)
             .build()
 
+        // Create OkHttpRequest
         val request = Request.Builder()
             .url(BuildConfig.TrackingApiBaseUrl + "login")
             .addHeader("Content-Type", "application/json")
@@ -63,27 +91,19 @@ class AuthFragment : Fragment(), Callback {
             .post(body)
             .build()
 
-        client.newCall(request).enqueue(this)
-    }
+        return withContext(Dispatchers.IO) {
+            // Execute request and get response
+            val response = client.newCall(request).execute()
 
-    override fun onResponse(call: Call, response: Response) {
-        // Parse JSON object ot kotlin data class
-        val r = Klaxon().parse<LoginResponse>(
-            response.body!!.string()) ?: return
-
-        // Show error if error is not empty
-        if (r.error.isNotEmpty()) activity?.runOnUiThread {
-            Toast.makeText(context, r.error,
-                Toast.LENGTH_LONG).show()
-        } else {
-            val action = AuthFragmentDirections
-                .startMap(r.token, r.id)
-            findNavController().navigate(action)
+            // Parse response
+            return@withContext Klaxon().parse<LoginResponse>(
+                response.body!!.string())!!
         }
     }
 
-    override fun onFailure(call: Call, e: IOException) {
-        Timber.e(e)
+    override fun onDestroy() {
+        job.cancel() // Cancels all jobs
+        super.onDestroy()
     }
 
     private data class LoginResponse(
@@ -91,6 +111,4 @@ class AuthFragment : Fragment(), Callback {
         val id: String = "",
         val error: String = ""
     )
-
-
 }
