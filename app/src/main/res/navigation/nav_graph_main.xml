@@ -9,6 +9,23 @@
         android:id="@+id/authFragment"
         android:name="com.fourcode.tracking.ui.auth.AuthFragment"
         android:label="auth_fragment"
-        tools:layout="@layout/auth_fragment" />
+        tools:layout="@layout/auth_fragment">
+        <action
+            android:id="@+id/startMap"
+            app:destination="@id/mapFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.fourcode.tracking.ui.map.MapFragment"
+        android:label="map_fragment"
+        tools:layout="@layout/map_fragment" >
+        <argument
+            android:name="token"
+            app:argType="string" />
+        <argument
+            android:name="userId"
+            app:argType="string" />
+    </fragment>
 
 </navigation>
