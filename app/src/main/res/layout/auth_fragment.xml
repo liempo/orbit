@@ -28,7 +28,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/email_text_input_layout"
+            android:id="@+id/user_text_input_layout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/text_input_layout_height"
             app:layout_constraintStart_toStartOf="parent"
@@ -36,11 +36,11 @@
             app:layout_constraintTop_toBottomOf="@id/banner">
 
             <EditText
-                android:id="@+id/email_input"
+                android:id="@+id/username_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_email"
-                android:inputType="textEmailAddress"/>
+                android:hint="@string/hint_username"
+                android:inputType="text"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -50,7 +50,7 @@
             android:layout_height="@dimen/text_input_layout_height"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/email_text_input_layout">
+            app:layout_constraintTop_toBottomOf="@id/user_text_input_layout">
 
             <EditText
                 android:id="@+id/password_input"
