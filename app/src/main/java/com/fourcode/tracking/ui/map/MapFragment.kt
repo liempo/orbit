@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+import androidx.navigation.findNavController
 
 import com.google.android.material.snackbar.Snackbar
 
@@ -47,8 +49,6 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions
 
 import kotlinx.android.synthetic.main.map_fragment.*
 
@@ -76,6 +76,9 @@ class MapFragment : Fragment(),
      * which might be needed for navigation  */
     private lateinit var engine: LocationEngine
 
+    /** Request object for locationEngine */
+    private lateinit var request: LocationEngineRequest
+
     /** Intent used to search places (reverse geocoding). */
     private lateinit var autocomplete: Intent
 
@@ -89,6 +92,12 @@ class MapFragment : Fragment(),
         super.onCreate(savedInstanceState)
         // Mapbox access token is configured here, null check with context
         context?.let {  Mapbox.getInstance(it, BuildConfig.MapboxApiKey) }
+
+        // Create a locationEngineRequest
+        request = LocationEngineRequest.Builder(DEFAULT_INTERVAL_MS)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
+            .build()
 
         // Initialize map's ViewModel
         model = ViewModelProviders.of(this)[MapViewModel::class.java]
@@ -123,11 +132,7 @@ class MapFragment : Fragment(),
                 // Request directions from mapbox
                 val builder = MapboxDirections.builder()
                     .accessToken(BuildConfig.MapboxApiKey)
-                    .overview(DirectionsCriteria.OVERVIEW_FULL)
                     .profile(DirectionsCriteria.PROFILE_DRIVING)
-                    .steps(true)
-                    .bannerInstructions(true)
-                    .voiceInstructions(true)
                     .origin(Point.fromLngLat(longitude, latitude))
 
                 it.forEachIndexed { index, item ->
@@ -151,11 +156,25 @@ class MapFragment : Fragment(),
 
                         // Start navigation UI onClick
                         setOnClickListener {
-                            val options = NavigationLauncherOptions.builder()
-                                .directionsRoute(model.route.value)
-                                .shouldSimulateRoute(true)
-                                .build()
-                            NavigationLauncher.startNavigation(activity, options)
+                            // Convert current location to LatLng object
+                            // will not crash cuz of a lot of reasons
+                            val originLatLng = LatLng(
+                                model.location.value!!.latitude,
+                                model.location.value!!.longitude)
+
+                            // Create an array where origin is the first index plus
+                            // destinations from the viewmodel
+                            // Will not crash because navigation_fab will
+                            // only be clickable if model.destinations.value > 0
+                            val waypoints = (arrayListOf(originLatLng).plus(
+                                model.destinations.value!!.map {
+                                LatLng(it.center()!!.latitude(), it.center()!!.longitude())
+                            })).toTypedArray()
+
+                            // Create an action (safeargs) then start
+                            val action = MapFragmentDirections
+                                .startNavigation(waypoints)
+                            findNavController().navigate(action)
                         }
 
                         // Show the fab
@@ -166,7 +185,7 @@ class MapFragment : Fragment(),
                             .setTarget(navigate_fab)
                             .setContentText(R.string.msg_showcase_start_navigation)
                             .setMaskColour(ContextCompat.
-                                getColor(context, R.color.colorPrimaryDark))
+                                getColor(context, R.color.colorPrimaryLight))
                             .setDismissText(R.string.action_showcase_done)
                             .setDismissTextColor(ContextCompat
                                 .getColor(context!!, R.color.colorPrimaryDark))
@@ -208,8 +227,19 @@ class MapFragment : Fragment(),
         }
 
         // Initially hide fab, it ain't ready yet
-        add_destination_fab.hide()
         navigate_fab.hide()
+        add_destination_fab.hide()
+
+        // If model has values (from backStack), enable stuff
+        if (model.destinations.value.isNullOrEmpty().not())
+            navigate_fab.show()
+
+        if (model.location.value != null)
+            add_destination_fab.show()
+        else if (::engine.isInitialized) {
+            engine.requestLocationUpdates(request,
+                this@MapFragment, Looper.getMainLooper())
+        }
     }
 
     /** Will run when a place got picked from autocomplete*/
@@ -218,9 +248,6 @@ class MapFragment : Fragment(),
         if (resultCode == RESULT_OK && requestCode == REQUEST_AUTOCOMPLETE) {
 
             val dest = PlaceAutocomplete.getPlace(data)
-
-            Timber.d("onActivityResult %s", (model.destinations.value.isNullOrEmpty().not() &&
-                    model.destinations.value?.last()?.id() == dest.id()).toString())
 
             if (model.destinations.value.isNullOrEmpty().not() &&
                 model.destinations.value?.last()?.id() == dest.id())
@@ -236,6 +263,7 @@ class MapFragment : Fragment(),
     /** Callback function for MapView.getAsync().
      * Runs after Mapview is initialized. */
     override fun onMapReady(mapboxMap: MapboxMap) {
+
         // Set a style then enable location component
         map = mapboxMap.apply {
             // Initialize map and set style
@@ -259,6 +287,7 @@ class MapFragment : Fragment(),
 
     /** Shows a snackbar if location is disabled. */
     private fun checkLocationServices() {
+
         // Get location manager system service
         val locationManager = (context?.getSystemService(
             Context.LOCATION_SERVICE) as LocationManager)
@@ -298,8 +327,6 @@ class MapFragment : Fragment(),
                 renderMode = RenderMode.NORMAL
                 cameraMode = CameraMode.TRACKING
                 isLocationComponentEnabled = true
-
-                Timber.i("Initialized location component")
             }
 
             // Initialize route source
@@ -335,11 +362,6 @@ class MapFragment : Fragment(),
     /** Initialize a location engine, and start it */
     private fun initializeLocationEngine() {
         context?.let { context ->
-            val request = // Build a LocationEngineRequest
-                LocationEngineRequest.Builder(DEFAULT_INTERVAL_MS)
-                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                    .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                    .build()
             engine = LocationEngineProvider
                 .getBestLocationEngine(context)
             engine.requestLocationUpdates(
@@ -413,10 +435,10 @@ class MapFragment : Fragment(),
                         .setTarget(this)
                         .setContentText(R.string.msg_showcase_add_destination)
                         .setMaskColour(ContextCompat.
-                            getColor(context, R.color.colorPrimaryDark))
+                            getColor(context, R.color.colorPrimaryLight))
                         .setDismissText(R.string.action_showcase_done)
                         .setDismissTextColor(ContextCompat.
-                            getColor(context, R.color.colorPrimaryLight))
+                            getColor(context, R.color.colorPrimaryDark))
                         // Works with bottom sheet
                         .renderOverNavigationBar()
                         .show()
