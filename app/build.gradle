@@ -79,4 +79,8 @@ dependencies {
     // Okhttp3 and json stuff
     implementation "com.squareup.okhttp3:okhttp:4.1.0"
     implementation 'com.beust:klaxon:5.0.1'
+
+    // Mapbox sdk and it's fucken plugen
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.1.0'
+
 }
