@@ -1,7 +1,12 @@
 <resources>
     <string name="app_name">Tracking</string>
 
-    <!--auth fragment strings -->
+    <!--  Shared preferences strings  -->
+    <string name="shared_pref_credentials">tracking_credentials</string>
+    <string name="shared_pref_token">tracking_username</string>
+    <string name="shared_pref_id">tracking_password</string>
+
+    <!--  Auth fragment strings  -->
     <string name="hint_username">Username</string>
     <string name="hint_password">Password</string>
     <string name="action_login">Login</string>

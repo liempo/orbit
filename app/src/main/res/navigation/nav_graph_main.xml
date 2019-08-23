@@ -19,13 +19,9 @@
         android:id="@+id/mapFragment"
         android:name="com.fourcode.tracking.ui.map.MapFragment"
         android:label="map_fragment"
-        tools:layout="@layout/map_fragment" >
-        <argument
-            android:name="token"
-            app:argType="string" />
-        <argument
-            android:name="userId"
-            app:argType="string" />
-    </fragment>
+        tools:layout="@layout/map_fragment" />
+    <action
+        android:id="@+id/logout"
+        app:destination="@id/authFragment" />
 
 </navigation>

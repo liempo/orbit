@@ -1,10 +1,12 @@
 package com.fourcode.tracking.ui.auth
 
+import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.beust.klaxon.Klaxon
@@ -61,9 +63,19 @@ class AuthFragment : Fragment(), CoroutineScope {
                     Toast.makeText(context,
                         response.error,
                         Toast.LENGTH_LONG).show()
-                else findNavController()
-                    .navigate(AuthFragmentDirections
-                        .startMap(response.token, response.id))
+                else {
+                    // Save credentials locally (this means user is logged in)
+                    activity?.getSharedPreferences(getString(R.string.
+                        shared_pref_credentials), MODE_PRIVATE)?.edit {
+                        putString(getString(R.string
+                            .shared_pref_token), response.token)
+                        putString(getString(R.string
+                            .shared_pref_id), response.id)
+                    }
+
+                    // Start mapFragment
+                    findNavController().navigate(R.id.mapFragment)
+                }
 
                 // Enable UI componente
                 username_input_layout.isEnabled = true
