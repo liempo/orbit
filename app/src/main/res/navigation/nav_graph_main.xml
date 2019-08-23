@@ -13,6 +13,10 @@
         <action
             android:id="@+id/startMap"
             app:destination="@id/mapFragment" />
+        <argument
+            android:name="logout"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 
     <fragment
@@ -21,7 +25,7 @@
         android:label="map_fragment"
         tools:layout="@layout/map_fragment" />
     <action
-        android:id="@+id/logout"
+        android:id="@+id/auth"
         app:destination="@id/authFragment" />
 
 </navigation>

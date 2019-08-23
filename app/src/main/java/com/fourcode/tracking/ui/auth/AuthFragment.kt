@@ -35,6 +35,17 @@ class AuthFragment : Fragment(), CoroutineScope {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Initialize shared preferences object, for credentials
+        val sharedPreferences =
+            requireActivity().getSharedPreferences(
+                getString(R.string.shared_pref_credentials), MODE_PRIVATE)
+
+        // Check if logged in first
+        val loggedInId = sharedPreferences.getString(
+            getString(R.string.shared_pref_id), null)
+        if (loggedInId.isNullOrBlank().not())
+            findNavController().navigate(AuthFragmentDirections.startMap())
+
         login_button.setOnClickListener {
             val username = username_input.text.toString()
             val password = password_input.text.toString()
@@ -65,8 +76,7 @@ class AuthFragment : Fragment(), CoroutineScope {
                         Toast.LENGTH_LONG).show()
                 else {
                     // Save credentials locally (this means user is logged in)
-                    activity?.getSharedPreferences(getString(R.string.
-                        shared_pref_credentials), MODE_PRIVATE)?.edit {
+                    sharedPreferences.edit {
                         putString(getString(R.string
                             .shared_pref_token), response.token)
                         putString(getString(R.string
