@@ -1,5 +1,6 @@
 package com.fourcode.tracking.ui.map
 
+import android.content.Intent
 import android.graphics.Color
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -7,16 +8,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import com.fourcode.tracking.BuildConfig
 
-import com.fourcode.tracking.R
 import com.mapbox.android.core.location.*
 import com.mapbox.android.core.permissions.*
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
-import com.mapbox.mapboxsdk.location.modes.RenderMode
+import com.mapbox.mapboxsdk.location.modes.*
 import com.mapbox.mapboxsdk.maps.*
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
@@ -24,14 +23,27 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 
+// Location Engine is too long for me i'm sorry guys
+import com.mapbox.android.core.location.LocationEngineCallback as EngineCallback
+import com.mapbox.android.core.location.LocationEngineResult as EngineResult
+import com.mapbox.android.core.location.LocationEngineRequest as EngineRequest
+
+import com.fourcode.tracking.R
+import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
+
 import kotlinx.android.synthetic.main.map_fragment.*
 
-import timber.log.Timber
 import java.lang.Exception
 
 class MapFragment : Fragment(),
-    LocationEngineCallback<LocationEngineResult>,
+    EngineCallback<EngineResult>,
     PermissionsListener {
+
     // LiveData object (Android jetpack)
     private lateinit var model: MapViewModel
 
@@ -41,13 +53,16 @@ class MapFragment : Fragment(),
     // Will make things less complicated. /
     private lateinit var permissions: PermissionsManager
 
+    // AUtocomplete Intent for opening mapbox's place picker
+    private lateinit var autocompleteIntent: Intent
+
     // Location engine, retrieves device's location
     private lateinit var locationEngine: LocationEngine
 
     // Location request, for the engine parameters
-    private val locationEngineRequest: LocationEngineRequest by lazy {
-        LocationEngineRequest.Builder(DEFAULT_INTERVAL_MS)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+    private val locationEngineRequest: EngineRequest by lazy {
+        EngineRequest.Builder(DEFAULT_INTERVAL_MS)
+            .setPriority(EngineRequest.PRIORITY_HIGH_ACCURACY)
             .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
             .build()
     }
@@ -88,16 +103,21 @@ class MapFragment : Fragment(),
             // Initialize a style then run callback
             map.setStyle(Style.TRAFFIC_DAY) { style ->
 
+                // Initialize location layer, and polylines
+                initializeMapComponents(style)
+
                 // Check permission before enabling stuff
-                if (PermissionsManager.areLocationPermissionsGranted(context)) {
+                if (PermissionsManager.areLocationPermissionsGranted(context))
                     initializeLocationEngine()
-                    initializeMapComponents(style)
-                } else {
+                else {
                     permissions = PermissionsManager(this@MapFragment)
                     permissions.requestLocationPermissions(requireActivity())
                 }
             }
         }
+
+        // Setup some pretty simple stuff
+        add_destination_fab.setOnClickListener { startAutocomplete() }
     }
 
     private fun initializeMapComponents(style: Style) {
@@ -162,31 +182,51 @@ class MapFragment : Fragment(),
         }
     }
 
-
     private fun initializeLocationEngine() {
         context?.let { context ->
             locationEngine = LocationEngineProvider
                 .getBestLocationEngine(context)
             locationEngine.requestLocationUpdates(
-                locationEngineRequest,this, context.mainLooper)
-            Timber.i("Initialized location locationEngine")
+                locationEngineRequest,
+                this, context.mainLooper)
         }
     }
 
+    private fun startAutocomplete(point: Point? = null) {
+        // Initialize autocomplete if it ain't (if it ain't, if it ain't)
+        if (::autocompleteIntent.isInitialized.not()) {
+            // Build intent for autocomplete
+            val builder = PlaceOptions.builder()
+                .backgroundColor(ContextCompat.getColor(context!!,
+                    R.color.colorAutocompleteBackground))
+            if (point != null) builder.proximity(point)
+
+            autocompleteIntent = PlaceAutocomplete.IntentBuilder()
+                .accessToken(BuildConfig.MapboxApiKey)
+                .placeOptions(builder.build())
+                .build(requireActivity())
+        }
+
+        startActivity(autocompleteIntent)
+    }
 
     /************ Mapbox permission listeners methods  ************/
     override fun onPermissionResult(granted: Boolean) {
-
+        initializeLocationEngine()
     }
 
-    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-
-    }
+    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {}
 
     /************ Mapbox location engine callback methods  ************/
-    override fun onSuccess(result: LocationEngineResult?) {
+    override fun onSuccess(result: EngineResult?) {
         result?.lastLocation?.run {
+            map.locationComponent.forceLocationUpdate(this)
 
+            if (result.locations.size == 1) {
+                // Move camera to center
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    LatLng(latitude, longitude),  MAP_ZOOM_DEFAULT))
+            }
         }
 
     }
@@ -244,6 +284,9 @@ class MapFragment : Fragment(),
         private const val DEST_ICON_ID = "dest_icon_id"
         private const val DEST_LAYER_ID = "dest_layer_id"
         private const val DEST_SOURCE_ID = "dest_source_id"
+
+        // Mapbox constants
+        private const val MAP_ZOOM_DEFAULT = 15.0
     }
 
 }
