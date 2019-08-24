@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fourcode.tracking.BuildConfig
@@ -87,17 +88,14 @@ class MapFragment : Fragment(),
         super.onActivityCreated(savedInstanceState)
         model = ViewModelProviders.of(this)
             .get(MapViewModel::class.java)
-    }
+        model.destinations.observe(this, Observer {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(
-        R.layout.map_fragment,
-        container, false)
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+            // Will run once
+            if (it.size == 1) {
+                bottom_sheet_title.visibility = View.GONE
+                bottom_sheet_header.visibility = View.VISIBLE
+            }
+        })
 
         // Initialize and configure map_view
         map_view.onCreate(savedInstanceState)
@@ -134,10 +132,17 @@ class MapFragment : Fragment(),
             this@MapFragment.adapter = DestinationAdapter()
             adapter = this@MapFragment.adapter
 
-            ItemTouchHelper(DestinationItemTouchHelperCallback())
+            ItemTouchHelper(DestinationItemTouchHelperCallback(model))
                 .attachToRecyclerView(destinations_recycler_view)
         }
     }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(
+        R.layout.map_fragment,
+        container, false)
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
