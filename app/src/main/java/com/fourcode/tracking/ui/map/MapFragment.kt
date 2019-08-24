@@ -37,6 +37,7 @@ import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 
 import kotlinx.android.synthetic.main.map_fragment.*
+import timber.log.Timber
 
 import java.lang.Exception
 
@@ -232,7 +233,7 @@ class MapFragment : Fragment(),
     }
 
     override fun onFailure(exception: Exception) {
-
+        Timber.e(exception)
     }
 
 
