@@ -33,7 +33,21 @@ import com.mapbox.android.core.location.LocationEngineCallback as EngineCallback
 import com.mapbox.android.core.location.LocationEngineResult as EngineResult
 import com.mapbox.android.core.location.LocationEngineRequest as EngineRequest
 
+import com.fourcode.tracking.ui.map.MapViewModel.Companion.ROUTE_SOURCE_ID
+import com.fourcode.tracking.ui.map.MapViewModel.Companion.ROUTE_LAYER_ID
+import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEST_SOURCE_ID
+import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEST_LAYER_ID
+import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEST_ICON_ID
+import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEFAULT_INTERVAL_MS
+import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEFAULT_MAX_WAIT_TIME
 import com.fourcode.tracking.R
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.MapboxDirections
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.LineString
+
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -42,13 +56,21 @@ import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 
 import kotlinx.android.synthetic.main.map_fragment.*
+import kotlinx.coroutines.*
 import timber.log.Timber
 
 import java.lang.Exception
+import kotlin.coroutines.CoroutineContext
 
 class MapFragment : Fragment(),
+    CoroutineScope,
     EngineCallback<EngineResult>,
     PermissionsListener {
+
+    // Implementation of CorutineScope interface
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     // LiveData object (Android jetpack)
     private lateinit var model: MapViewModel
@@ -86,6 +108,8 @@ class MapFragment : Fragment(),
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        // Initialize model and its observers
         model = ViewModelProviders.of(this)
             .get(MapViewModel::class.java)
         model.destinations.observe(this, Observer {
@@ -94,6 +118,65 @@ class MapFragment : Fragment(),
             if (it.size == 1) {
                 bottom_sheet_title.visibility = View.GONE
                 bottom_sheet_header.visibility = View.VISIBLE
+            }
+        })
+        model.location.observe(this, Observer {
+            map.locationComponent.forceLocationUpdate(it)
+        })
+        model.destinations.observe(this, Observer {
+
+            if (model.location.value == null)
+                return@Observer
+
+            // Convert location object to point (downgrade)
+            val originPoint = Point.fromLngLat(
+                model.location.value!!.longitude,
+                model.location.value!!.latitude
+            )
+
+            // Convert list of features to list of points (downgrade)
+            val destinationPoints = it.map { d -> d.center()!! }
+
+            launch {
+                // Run call
+                val route = getBestRoute(
+                    originPoint, destinationPoints)
+                // Update model value
+                model.route.value = route
+            }
+        })
+        model.route.observe(this, Observer {
+
+            // Draw a polyline from route on map
+            // Must explicitly compare to true,
+            // cuz isFullyLoaded might be null
+            if (map.style?.isFullyLoaded == true) {
+
+                // Extract elements from API call and map's style
+                val source = (map.style?.getSource(
+                    ROUTE_SOURCE_ID) as GeoJsonSource)
+                val line = LineString.fromPolyline(
+                    it.geometry()!!, Constants.PRECISION_6)
+                val geoJson = FeatureCollection.
+                    fromFeature(Feature.fromGeometry(line))
+
+                // Draw route on map
+                source.apply {
+                    setGeoJson(geoJson)
+                }
+            }
+
+            // Update distance if it.distance() does not return null
+            it.distance()?.let { distance ->
+                total_distance_text.text =
+                    if (distance >= 1000)
+                        getString(R.string.format_distance_kilometers, distance / 1000)
+                    else getString(R.string.format_distance_meters, distance)
+            }
+
+            // Update duration if it.duration() does not retunrn null
+            it.duration()?.let { duration ->
+                total_duration_text.text = getReadableTime(duration.toInt())
             }
         })
 
@@ -254,6 +337,30 @@ class MapFragment : Fragment(),
         startActivityForResult(autocompleteIntent, AUTOCOMPLETE_REQUEST)
     }
 
+    private suspend fun getBestRoute(
+        origin: Point,
+        destinations: List<Point>):
+            DirectionsRoute {
+
+        // Build a directions request object
+        val builder = MapboxDirections.builder()
+            .accessToken(BuildConfig.MapboxApiKey)
+            .profile(DirectionsCriteria.PROFILE_DRIVING)
+            .origin(Point.fromLngLat(origin.longitude(), origin.latitude()))
+        // Populate waypoint and destinations
+        destinations.forEachIndexed { index, item ->
+            if (destinations.lastIndex == index)
+                builder.destination(item)
+            else builder.addWaypoint(item)
+        }
+
+        // Execute call and use directionsCallback
+        return withContext(Dispatchers.IO) {
+            return@withContext builder.build()
+                .executeCall().body()!!.routes()[0]
+        } // Coroutines are a whole new level
+    }
+
     /************ Mapbox permission listeners methods  ************/
     override fun onPermissionResult(granted: Boolean) {
         initializeLocationEngine()
@@ -264,22 +371,21 @@ class MapFragment : Fragment(),
     /************ Mapbox location engine callback methods  ************/
     override fun onSuccess(result: EngineResult?) {
         result?.lastLocation?.run {
-            map.locationComponent.forceLocationUpdate(this)
 
-            if (result.locations.size == 1) {
+            // Run on first detected location
+            if (model.location.value == null) {
                 // Move camera to center
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     LatLng(latitude, longitude),  MAP_ZOOM_DEFAULT))
             }
-        }
 
+            model.location.value = this
+        }
     }
 
     override fun onFailure(exception: Exception) {
         Timber.e(exception)
     }
-
-
 
     /************* Mapbox lifecycle boiler plate alert!!!! **********/
     override fun onStart() {
@@ -318,20 +424,19 @@ class MapFragment : Fragment(),
     }
 
     companion object {
-        // constants for the LocationEngineResult
-        private const val DEFAULT_INTERVAL_MS = 2000L
-        private const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
-
-        // Mapbox style and layers ids
-        private const val ROUTE_LAYER_ID = "route_layer"
-        private const val ROUTE_SOURCE_ID = "route_source"
-        private const val DEST_ICON_ID = "dest_icon_id"
-        private const val DEST_LAYER_ID = "dest_layer_id"
-        private const val DEST_SOURCE_ID = "dest_source_id"
-
         // Mapbox constants
-        private const val MAP_ZOOM_DEFAULT = 15.0
-        private const val AUTOCOMPLETE_REQUEST = 12494
+        internal const val MAP_ZOOM_DEFAULT = 15.0
+        internal const val AUTOCOMPLETE_REQUEST = 12494
+
+        // Formats totalSeconds to Hh Mm Ss
+        private fun getReadableTime(totalSeconds: Int): String {
+            val minutesInHour = 60
+            val secondsInMinute = 6
+            val totalMinutes = totalSeconds / secondsInMinute
+            val minutes = totalMinutes % minutesInHour
+            val hours = totalMinutes / minutesInHour
+            return if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+        }
     }
 
 }

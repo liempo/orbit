@@ -16,5 +16,7 @@
     <string name="msg_loading">Loading</string>
     <string name="title_destinations_empty">Wow, such empty</string>
     <string name="title_destinations">Please add destinations</string>
+    <string name="format_distance_kilometers">%.2f km</string>
+    <string name="format_distance_meters">%.2f m</string>
 
 </resources>
