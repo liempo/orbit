@@ -15,6 +15,6 @@
     <!--  Map fragment strings -->
     <string name="msg_loading">Loading</string>
     <string name="title_destinations_empty">Wow, such empty</string>
-    <string name="title_destinations">Destinations</string>
+    <string name="title_destinations">Please add destinations</string>
 
 </resources>
