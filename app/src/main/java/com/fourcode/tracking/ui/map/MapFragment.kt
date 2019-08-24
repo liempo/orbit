@@ -41,6 +41,7 @@ import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEST_ICON_ID
 import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEFAULT_INTERVAL_MS
 import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEFAULT_MAX_WAIT_TIME
 import com.fourcode.tracking.R
+import com.google.android.material.snackbar.Snackbar
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -128,6 +129,11 @@ class MapFragment : Fragment(),
             if (model.location.value == null)
                 return@Observer
 
+            if (it.isEmpty()) {
+                bottom_sheet_title.visibility = View.VISIBLE
+                bottom_sheet_header.visibility = View.INVISIBLE
+            }
+
             // Convert location object to point (downgrade)
             val originPoint = Point.fromLngLat(
                 model.location.value!!.longitude,
@@ -137,7 +143,19 @@ class MapFragment : Fragment(),
             // Convert list of features to list of points (downgrade)
             val destinationPoints = it.map { d -> d.center()!! }
 
-            launch {
+            // Error handler for coroutines
+            val errorHandler = CoroutineExceptionHandler {
+                    _, throwable ->
+                Timber.e(throwable)
+
+                Snackbar.make(bottom_sheet_card,
+                    getString(R.string.error_route_failed),
+                    Snackbar.LENGTH_SHORT)
+                    .setAction(R.string.action_retry) {}
+                    .show()
+            }
+
+            launch (coroutineContext + errorHandler) {
                 // Run call
                 val route = getBestRoute(
                     originPoint, destinationPoints)
@@ -146,6 +164,10 @@ class MapFragment : Fragment(),
             }
         })
         model.route.observe(this, Observer {
+
+            // Enable navigate_fab as soon as a route is available
+            if (navigate_fab.isOrWillBeHidden)
+                navigate_fab.show()
 
             // Draw a polyline from route on map
             // Must explicitly compare to true,
@@ -176,7 +198,8 @@ class MapFragment : Fragment(),
 
             // Update duration if it.duration() does not retunrn null
             it.duration()?.let { duration ->
-                total_duration_text.text = getReadableTime(duration.toInt())
+                total_duration_text.text =
+                    getReadableTime(duration.toInt())
             }
         })
 
@@ -215,9 +238,13 @@ class MapFragment : Fragment(),
             this@MapFragment.adapter = DestinationAdapter()
             adapter = this@MapFragment.adapter
 
-            ItemTouchHelper(DestinationItemTouchHelperCallback(model))
+            ItemTouchHelper(DestinationItemTouchHelperCallback(
+                model, this@MapFragment.adapter))
                 .attachToRecyclerView(destinations_recycler_view)
         }
+
+        // Hide initially while destinations is empty
+        navigate_fab.hide()
     }
 
     override fun onCreateView(
@@ -319,21 +346,25 @@ class MapFragment : Fragment(),
         }
     }
 
-    private fun startAutocomplete(point: Point? = null) {
+    private fun startAutocomplete() {
         // Initialize autocomplete if it ain't (if it ain't, if it ain't)
         if (::autocompleteIntent.isInitialized.not()) {
             // Build intent for autocomplete
             val builder = PlaceOptions.builder()
                 .backgroundColor(ContextCompat.getColor(context!!,
                     R.color.colorAutocompleteBackground))
-            if (point != null) builder.proximity(point)
+            if (model.location.value != null) {
+                builder.proximity(Point.fromLngLat(
+                    model.location.value!!.longitude,
+                    model.location.value!!.latitude))
+                Timber.i("Autocomplete proximity enabled")
+            }
 
             autocompleteIntent = PlaceAutocomplete.IntentBuilder()
                 .accessToken(BuildConfig.MapboxApiKey)
                 .placeOptions(builder.build())
                 .build(requireActivity())
         }
-
         startActivityForResult(autocompleteIntent, AUTOCOMPLETE_REQUEST)
     }
 
@@ -410,7 +441,8 @@ class MapFragment : Fragment(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        map_view.onSaveInstanceState(outState)
+        if (map_view != null)
+            map_view.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {

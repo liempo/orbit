@@ -9,7 +9,8 @@ import com.fourcode.tracking.R
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import kotlinx.android.synthetic.main.destination_item.view.*
 
-class DestinationAdapter(private val items: ArrayList<CarmenFeature> = arrayListOf()):
+class DestinationAdapter(
+    private val items: ArrayList<CarmenFeature> = arrayListOf()):
     RecyclerView.Adapter<DestinationAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -26,6 +27,12 @@ class DestinationAdapter(private val items: ArrayList<CarmenFeature> = arrayList
 
     internal fun add(destination: CarmenFeature) {
         items.add(destination); notifyDataSetChanged()
+    }
+
+    internal fun delete(position: Int) {
+        items.removeAt(position)
+        notifyItemRemoved(position)
+
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {

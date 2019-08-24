@@ -13,10 +13,12 @@
     <string name="error_field_required">This field is required.</string>
 
     <!--  Map fragment strings -->
+    <string name="action_retry">Retry</string>
     <string name="msg_loading">Loading</string>
     <string name="title_destinations_empty">Wow, such empty</string>
     <string name="title_destinations">Please add destinations</string>
     <string name="format_distance_kilometers">%.2f km</string>
     <string name="format_distance_meters">%.2f m</string>
+    <string name="error_route_failed">Failed to find a route</string>
 
 </resources>
