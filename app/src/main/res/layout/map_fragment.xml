@@ -108,9 +108,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/destinations_title"
-                app:layout_constraintBottom_toBottomOf="parent"/>
-                <!--tools:listitem="@layout/item_destinations"-->
-
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:listitem="@layout/destination_item" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

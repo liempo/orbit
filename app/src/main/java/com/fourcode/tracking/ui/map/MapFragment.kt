@@ -1,5 +1,6 @@
 package com.fourcode.tracking.ui.map
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.Color
 import androidx.lifecycle.ViewModelProviders
@@ -9,6 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.fourcode.tracking.BuildConfig
 
 import com.mapbox.android.core.location.*
@@ -47,6 +51,9 @@ class MapFragment : Fragment(),
 
     // LiveData object (Android jetpack)
     private lateinit var model: MapViewModel
+
+    // Adapter destinations_recycler_view
+    private lateinit var adapter: DestinationAdapter
 
     // Main Mapbox Object
     private lateinit var map: MapboxMap
@@ -119,6 +126,37 @@ class MapFragment : Fragment(),
 
         // Setup some pretty simple stuff
         add_destination_fab.setOnClickListener { startAutocomplete() }
+
+        // Intiialize RecyclerView
+        with(destinations_recycler_view) {
+            layoutManager = LinearLayoutManager(context)
+
+            this@MapFragment.adapter = DestinationAdapter()
+            adapter = this@MapFragment.adapter
+
+            ItemTouchHelper(DestinationItemTouchHelperCallback())
+                .attachToRecyclerView(destinations_recycler_view)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK && requestCode == AUTOCOMPLETE_REQUEST)
+            with (PlaceAutocomplete.getPlace(data)) {
+                model.destinations.add(this)
+                adapter.add(this)
+            }
+    }
+
+    private fun <T> MutableLiveData<ArrayList<T>>.add(item: T) {
+        // Crate an new list if list live data is null
+        val newList =
+            if (value == null)
+                arrayListOf()
+            else value!!
+        newList.add(item)
+        // Change value (will notify observers)
+        this.value = newList
     }
 
     private fun initializeMapComponents(style: Style) {
@@ -208,7 +246,7 @@ class MapFragment : Fragment(),
                 .build(requireActivity())
         }
 
-        startActivity(autocompleteIntent)
+        startActivityForResult(autocompleteIntent, AUTOCOMPLETE_REQUEST)
     }
 
     /************ Mapbox permission listeners methods  ************/
@@ -288,6 +326,7 @@ class MapFragment : Fragment(),
 
         // Mapbox constants
         private const val MAP_ZOOM_DEFAULT = 15.0
+        private const val AUTOCOMPLETE_REQUEST = 12494
     }
 
 }
