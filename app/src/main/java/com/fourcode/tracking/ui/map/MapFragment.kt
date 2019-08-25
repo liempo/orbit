@@ -130,6 +130,9 @@ class MapFragment : Fragment(),
                 return@Observer
 
             if (it.isEmpty()) {
+                // Diable navigate_fab
+                navigate_fab.hide()
+
                 // Hide headers
                 bottom_sheet_title.visibility = View.VISIBLE
                 bottom_sheet_header.visibility = View.INVISIBLE
