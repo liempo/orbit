@@ -130,8 +130,16 @@ class MapFragment : Fragment(),
                 return@Observer
 
             if (it.isEmpty()) {
+                // Hide headers
                 bottom_sheet_title.visibility = View.VISIBLE
                 bottom_sheet_header.visibility = View.INVISIBLE
+
+                // Remove route on map
+                (map.style?.getSource(ROUTE_SOURCE_ID) as GeoJsonSource)
+                    .setGeoJson(FeatureCollection
+                        .fromFeatures(arrayOf()))
+
+                return@Observer
             }
 
             // Convert location object to point (downgrade)
@@ -148,6 +156,7 @@ class MapFragment : Fragment(),
                     _, throwable ->
                 Timber.e(throwable)
 
+                model.route.value = null
                 Snackbar.make(bottom_sheet_card,
                     getString(R.string.error_route_failed),
                     Snackbar.LENGTH_SHORT)
@@ -164,6 +173,8 @@ class MapFragment : Fragment(),
             }
         })
         model.route.observe(this, Observer {
+            // return if null
+            if (it == null) return@Observer
 
             // Enable navigate_fab as soon as a route is available
             if (navigate_fab.isOrWillBeHidden)
@@ -173,6 +184,7 @@ class MapFragment : Fragment(),
             // Must explicitly compare to true,
             // cuz isFullyLoaded might be null
             if (map.style?.isFullyLoaded == true) {
+                Timber.i("Map style is fully loaded")
 
                 // Extract elements from API call and map's style
                 val source = (map.style?.getSource(
