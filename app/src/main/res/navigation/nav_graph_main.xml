@@ -12,7 +12,10 @@
         tools:layout="@layout/auth_fragment">
         <action
             android:id="@+id/startMap"
-            app:destination="@id/mapFragment" />
+            app:destination="@id/mapFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/nav_graph_main"
+            app:popUpToInclusive="true" />
         <argument
             android:name="logout"
             app:argType="boolean"
