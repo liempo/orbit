@@ -20,7 +20,8 @@ android {
         debug {
             // Imports private strings into project from global gradle properties
             buildConfigField 'String', "MapboxApiKey", MAPBOX_API_KEY
-            buildConfigField 'String', "TrackingApiBaseUrl", TRACKING_API_BASE_URL
+            buildConfigField 'String', "AuthApiUrl", TRACKING_AUTH_API_BASE_URL
+            buildConfigField 'String', "CentrifugeUrl", TRACKING_CENTRIFUGE_URL
         }
 
         release {
@@ -41,7 +42,8 @@ android {
 
             // Imports MAP_BOX_API_KEY into project from global gradle properties
             buildConfigField 'String', "MapboxApiKey", MAPBOX_API_KEY
-            buildConfigField 'String', "TrackingApiBaseUrl", TRACKING_API_BASE_URL
+            buildConfigField 'String', "AuthApiUrl", TRACKING_AUTH_API_BASE_URL
+            buildConfigField 'String', "CentrifugeUrl", TRACKING_CENTRIFUGE_URL
         }
 
         compileOptions {
