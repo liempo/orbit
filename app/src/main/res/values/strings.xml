@@ -3,8 +3,9 @@
 
     <!--  Shared preferences strings  -->
     <string name="shared_pref_credentials">tracking_credentials</string>
-    <string name="shared_pref_token">tracking_username</string>
-    <string name="shared_pref_id">tracking_password</string>
+    <string name="shared_pref_token">tracking_token</string>
+    <string name="shared_pref_admin_id">tracking_admin_id</string>
+    <string name="shared_pref_user_id">tracking_user_id</string>
 
     <!--  Auth fragment strings  -->
     <string name="hint_username">Username</string>

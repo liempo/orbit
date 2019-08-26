@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
@@ -17,6 +19,7 @@ import kotlinx.coroutines.*
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 
 class AuthFragment : Fragment(), CoroutineScope {
@@ -24,6 +27,8 @@ class AuthFragment : Fragment(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
+
+    private val args: AuthFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,9 +45,16 @@ class AuthFragment : Fragment(), CoroutineScope {
             requireActivity().getSharedPreferences(
                 getString(R.string.shared_pref_credentials), MODE_PRIVATE)
 
+        // Check if logout argument
+        if (args.logout) sharedPreferences.edit {
+            remove(getString(R.string.shared_pref_admin_id))
+            remove(getString(R.string.shared_pref_token))
+        }
+
         // Check if logged in first
         val loggedInId = sharedPreferences.getString(
-            getString(R.string.shared_pref_id), null)
+            getString(R.string.shared_pref_admin_id), null)
+
         if (loggedInId.isNullOrBlank().not())
             findNavController().navigate(AuthFragmentDirections.startMap())
 
@@ -80,7 +92,9 @@ class AuthFragment : Fragment(), CoroutineScope {
                         putString(getString(R.string
                             .shared_pref_token), response.token)
                         putString(getString(R.string
-                            .shared_pref_id), response.id)
+                            .shared_pref_admin_id), response.adminId)
+                        putString(getString(R.string
+                            .shared_pref_user_id), response.userId)
                     }
 
                     // Start mapFragment
@@ -107,7 +121,7 @@ class AuthFragment : Fragment(), CoroutineScope {
 
         // Create OkHttpRequest
         val request = Request.Builder()
-            .url(BuildConfig.TrackingApiBaseUrl + "login")
+            .url(BuildConfig.AuthApiUrl + "login")
             .addHeader("Content-Type", "application/json")
             .addHeader("Accept", "application/json")
             .post(body)
@@ -129,8 +143,9 @@ class AuthFragment : Fragment(), CoroutineScope {
     }
 
     private data class LoginResponse(
-        val token: String = "",
-        val id: String = "",
+        @Json(name = "token") val token: String = "",
+        @Json(name = "user_id") val userId: String = "",
+        @Json(name = "admin_d") val adminId: String = "",
         val error: String = ""
     )
 }
