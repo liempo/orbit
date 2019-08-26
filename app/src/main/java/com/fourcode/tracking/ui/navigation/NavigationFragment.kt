@@ -2,6 +2,7 @@ package com.fourcode.tracking.ui.navigation
 
 
 import android.content.Context.MODE_PRIVATE
+import android.location.Location
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,13 +16,20 @@ import com.fourcode.tracking.R
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener
+import com.mapbox.services.android.navigation.v5.milestone.Milestone
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import io.github.centrifugal.centrifuge.*
 
 import kotlinx.android.synthetic.main.fragment_navigation.*
 import timber.log.Timber
 
 class NavigationFragment : Fragment(),
-    NavigationListener, ReplyCallback<PublishResult> {
+    NavigationListener,
+    ProgressChangeListener,
+    MilestoneEventListener,
+    ReplyCallback<PublishResult> {
 
     private val args: NavigationFragmentArgs by navArgs()
 
@@ -67,6 +75,8 @@ class NavigationFragment : Fragment(),
             val options = NavigationViewOptions.builder()
                 .directionsRoute(DirectionsRoute.fromJson(args.routeJson))
                 .navigationListener(this)
+                .milestoneEventListener(this)
+                .progressChangeListener(this)
                 .build()
             nav_view.startNavigation(options)
 
@@ -84,15 +94,35 @@ class NavigationFragment : Fragment(),
     }
 
     override fun onNavigationRunning() {
-        // Broadcast if location is acquired
-        nav_view.retrieveMapboxNavigation()?.addRawLocationListener {
-            val dataToSend = getString(R.string.format_location_centrifuge,
-                it.latitude, it.longitude)
-            Timber.d("DataToSend: $dataToSend")
+        nav_view.retrieveMapboxNavigation()?.let {
+            it.addOffRouteListener {
+                val notif = getString(R.string.format_notification_centrifuge,
+                    getString(R.string.msg_notification_off_route))
+                client.publish("notification:$adminId",
+                    notif.toByteArray(), this)
+            }
+        }
+    }
 
+    override fun onProgressChange(location: Location?, routeProgress: RouteProgress?) {
+        location?.let {
+            val dataToSend = getString(R.string.
+                format_location_centrifuge,
+                it.latitude, it.longitude)
             client.publish("location:$adminId",
                 dataToSend.toByteArray(), this)
         }
+    }
+
+    override fun onMilestoneEvent(
+        routeProgress: RouteProgress?,
+        instruction: String?,
+        milestone: Milestone?
+    ) {
+        if (instruction.isNullOrEmpty().not())
+            client.publish("notification:$adminId",
+                getString(R.string.format_notification_centrifuge,
+                    instruction).toByteArray(), this)
     }
 
     override fun onDone(error: ReplyError?, result: PublishResult?) {
