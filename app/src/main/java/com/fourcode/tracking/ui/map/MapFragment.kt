@@ -2,7 +2,6 @@ package com.fourcode.tracking.ui.map
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.graphics.Color
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -54,12 +53,14 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
+import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 
 import kotlinx.android.synthetic.main.map_fragment.*
 import kotlinx.coroutines.*
 import timber.log.Timber
 
 import java.lang.Exception
+import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
 class MapFragment : Fragment(),
@@ -151,7 +152,12 @@ class MapFragment : Fragment(),
             )
 
             // Convert list of features to list of points (downgrade)
-            val destinationPoints = it.map { d -> d.center()!! }
+            val points = it.map { d -> d.center()!! }
+
+            // Add icon to map style
+            val features = points.map { p -> Feature.fromGeometry(p) }
+            (map.style?.getSource(DEST_SOURCE_ID) as GeoJsonSource)
+                .setGeoJson(FeatureCollection.fromFeatures(features))
 
             // Error handler for coroutines
             val errorHandler = CoroutineExceptionHandler {
@@ -169,7 +175,7 @@ class MapFragment : Fragment(),
             launch (coroutineContext + errorHandler) {
                 // Run call
                 val route = getBestRoute(
-                    originPoint, destinationPoints)
+                    originPoint, points)
                 // Update model value
                 model.route.value = route
             }
@@ -212,8 +218,8 @@ class MapFragment : Fragment(),
 
             // Update duration if it.duration() does not retunrn null
             it.duration()?.let { duration ->
-                total_duration_text.text =
-                    getReadableTime(duration.toInt())
+                total_duration_text.text = TimeFormatter.
+                    formatTimeRemaining(context, duration)
             }
         })
 
@@ -297,20 +303,6 @@ class MapFragment : Fragment(),
     private fun initializeMapComponents(style: Style) {
         context?.let {context ->
 
-            // Initialize location component
-            with(map.locationComponent) {
-                // Activate location component with the following options
-                activateLocationComponent(
-                    LocationComponentActivationOptions.builder(context, style)
-                        .useDefaultLocationEngine(false)
-                        .build())
-
-                // Set component modes and enable
-                renderMode = RenderMode.NORMAL
-                cameraMode = CameraMode.TRACKING
-                isLocationComponentEnabled = true
-            }
-
             // Initialize route source
             style.addSource(
                 GeoJsonSource(
@@ -332,15 +324,15 @@ class MapFragment : Fragment(),
                 LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
                     lineCap(Property.LINE_CAP_ROUND),
                     lineJoin(Property.LINE_JOIN_ROUND),
-                    lineWidth(5f),
-                    lineColor(Color.parseColor("#009688"))
+                    lineWidth(7f),
+                    lineColor(ContextCompat.getColor(context, R.color.colorAccent))
                 )
             )
 
             // Add icon to style
             style.addImage(
                 DEST_ICON_ID, resources.getDrawable(
-                    R.drawable.ic_place_primary_24dp, activity?.theme
+                    R.drawable.ic_place_red_24dp, activity?.theme
                 )
             )
 
@@ -353,6 +345,20 @@ class MapFragment : Fragment(),
                     iconOffset(arrayOf(0f, -4f))
                 )
             )
+
+            // Initialize location component
+            with(map.locationComponent) {
+                // Activate location component with the following options
+                activateLocationComponent(
+                    LocationComponentActivationOptions.builder(context, style)
+                        .useDefaultLocationEngine(false)
+                        .build())
+
+                // Set component modes and enable
+                renderMode = RenderMode.NORMAL
+                cameraMode = CameraMode.TRACKING
+                isLocationComponentEnabled = true
+            }
         }
     }
 
@@ -392,22 +398,20 @@ class MapFragment : Fragment(),
         origin: Point,
         destinations: List<Point>):
             DirectionsRoute {
-
-        // Build a directions request object
         val builder = MapboxDirections.builder()
             .accessToken(BuildConfig.MapboxApiKey)
-            .profile(DirectionsCriteria.PROFILE_DRIVING)
+            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .overview(DirectionsCriteria.OVERVIEW_FULL)
             .voiceInstructions(true)
             .bannerInstructions(true)
-            .steps(true)
             .origin(Point.fromLngLat(origin.longitude(), origin.latitude()))
+        // Build a directions request object
         // Populate waypoint and destinations
         destinations.forEachIndexed { index, item ->
             if (destinations.lastIndex == index)
                 builder.destination(item)
             else builder.addWaypoint(item)
         }
-
         // Execute call and use directionsCallback
         return withContext(Dispatchers.IO) {
             return@withContext builder.build()
@@ -486,14 +490,5 @@ class MapFragment : Fragment(),
         internal const val DEFAULT_INTERVAL_MS = 5000L
         internal const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
 
-        // Formats totalSeconds to Hh Mm Ss
-        private fun getReadableTime(totalSeconds: Int): String {
-            val minutesInHour = 60
-            val secondsInMinute = 6
-            val totalMinutes = totalSeconds / secondsInMinute
-            val minutes = totalMinutes % minutesInHour
-            val hours = totalMinutes / minutesInHour
-            return if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
-        }
     }
 }
