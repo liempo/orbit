@@ -1,6 +1,7 @@
 package com.fourcode.tracking.ui.navigation
 
 
+import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,27 +9,35 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.fourcode.tracking.BuildConfig
 
 import com.fourcode.tracking.R
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener
-
+import io.github.centrifugal.centrifuge.*
 
 import kotlinx.android.synthetic.main.fragment_navigation.*
 import timber.log.Timber
 
-class NavigationFragment : Fragment(), NavigationListener {
+class NavigationFragment : Fragment(),
+    NavigationListener, ReplyCallback<PublishResult> {
 
     private val args: NavigationFragmentArgs by navArgs()
 
-    // Location request, for the engine parameters
-    private val locationEngineRequest: LocationEngineRequest by lazy {
-        LocationEngineRequest.Builder(NAV_INTERVAL_MS)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .setMaxWaitTime(NAV_MAX_WAIT_TIME)
-            .build()
+    // Centrifuge client to broadcast device's location
+    private val client = Client(BuildConfig.CentrifugeUrl,
+        Options(), CentrifugeListener())
+
+    // Authentication token (retrieved in auth frag)
+    private var token: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        token = requireActivity().getSharedPreferences(getString(
+                R.string.shared_pref_credentials), MODE_PRIVATE)
+            .getString(getString(R.string.shared_pref_token), null)
     }
 
     override fun onCreateView(
@@ -41,6 +50,11 @@ class NavigationFragment : Fragment(), NavigationListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        // Connect to socket
+        client.setToken(token)
+        client.connect()
+
+        // Init and star navigation
         nav_view.onCreate(savedInstanceState)
         nav_view.initialize {
 
@@ -68,8 +82,15 @@ class NavigationFragment : Fragment(), NavigationListener {
         // Broadcast if location is acquired
         nav_view.retrieveMapboxNavigation()?.addRawLocationListener {
             Timber.d("NavLocation: (${it.latitude}, ${it.longitude})")
+//            client.publish("", null, this)
         }
     }
+
+    override fun onDone(error: ReplyError?, result: PublishResult?) {
+
+    }
+
+    override fun onFailure(e: Throwable?) { Timber.e(e) }
 
     override fun onStart() {
         super.onStart()
@@ -113,9 +134,4 @@ class NavigationFragment : Fragment(), NavigationListener {
         nav_view.onDestroy()
     }
 
-    companion object {
-        // constants for the LocationEngineResult
-        internal const val NAV_INTERVAL_MS = 5000L
-        internal const val NAV_MAX_WAIT_TIME = NAV_INTERVAL_MS * 5
-    }
 }
