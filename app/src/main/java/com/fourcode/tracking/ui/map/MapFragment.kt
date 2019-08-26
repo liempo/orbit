@@ -203,9 +203,7 @@ class MapFragment : Fragment(),
                     fromFeature(Feature.fromGeometry(line))
 
                 // Draw route on map
-                source.apply {
-                    setGeoJson(geoJson)
-                }
+                source.apply { setGeoJson(geoJson) }
             }
 
             // Update distance if it.distance() does not return null
@@ -404,6 +402,9 @@ class MapFragment : Fragment(),
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .voiceInstructions(true)
             .bannerInstructions(true)
+            // I don' know what the
+            // fuck does this param do
+            .steps(true)
             .origin(Point.fromLngLat(origin.longitude(), origin.latitude()))
         // Build a directions request object
         // Populate waypoint and destinations
