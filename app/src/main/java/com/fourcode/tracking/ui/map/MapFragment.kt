@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fourcode.tracking.BuildConfig
@@ -38,8 +39,6 @@ import com.fourcode.tracking.ui.map.MapViewModel.Companion.ROUTE_LAYER_ID
 import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEST_SOURCE_ID
 import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEST_LAYER_ID
 import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEST_ICON_ID
-import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEFAULT_INTERVAL_MS
-import com.fourcode.tracking.ui.map.MapViewModel.Companion.DEFAULT_MAX_WAIT_TIME
 import com.fourcode.tracking.R
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -245,6 +244,15 @@ class MapFragment : Fragment(),
 
         // Setup some pretty simple stuff
         add_destination_fab.setOnClickListener { startAutocomplete() }
+        navigate_fab.setOnClickListener {
+            model.route.value?.let {
+                findNavController().navigate(MapFragmentDirections
+                    .startNavigation(it.toJson()))
+            }
+        }
+
+        // Hide initially while destinations is empty
+        navigate_fab.hide()
 
         // Intiialize RecyclerView
         with(destinations_recycler_view) {
@@ -257,9 +265,6 @@ class MapFragment : Fragment(),
                 model, this@MapFragment.adapter))
                 .attachToRecyclerView(destinations_recycler_view)
         }
-
-        // Hide initially while destinations is empty
-        navigate_fab.hide()
     }
 
     override fun onCreateView(
@@ -392,6 +397,9 @@ class MapFragment : Fragment(),
         val builder = MapboxDirections.builder()
             .accessToken(BuildConfig.MapboxApiKey)
             .profile(DirectionsCriteria.PROFILE_DRIVING)
+            .voiceInstructions(true)
+            .bannerInstructions(true)
+            .steps(true)
             .origin(Point.fromLngLat(origin.longitude(), origin.latitude()))
         // Populate waypoint and destinations
         destinations.forEachIndexed { index, item ->
@@ -456,13 +464,12 @@ class MapFragment : Fragment(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (map_view != null)
-            map_view.onSaveInstanceState(outState)
+        map_view?.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        map_view.onDestroy()
+        map_view?.onDestroy()
     }
 
     override fun onLowMemory() {
@@ -475,6 +482,10 @@ class MapFragment : Fragment(),
         internal const val MAP_ZOOM_DEFAULT = 15.0
         internal const val AUTOCOMPLETE_REQUEST = 12494
 
+        // constants for the LocationEngineResult
+        internal const val DEFAULT_INTERVAL_MS = 5000L
+        internal const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
+
         // Formats totalSeconds to Hh Mm Ss
         private fun getReadableTime(totalSeconds: Int): String {
             val minutesInHour = 60
@@ -485,5 +496,4 @@ class MapFragment : Fragment(),
             return if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
         }
     }
-
 }

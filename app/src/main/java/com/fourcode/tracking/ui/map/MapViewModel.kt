@@ -19,10 +19,6 @@ class MapViewModel : ViewModel() {
     val route: MutableLiveData<DirectionsRoute> = MutableLiveData()
 
     companion object {
-        // constants for the LocationEngineResult
-        internal const val DEFAULT_INTERVAL_MS = 2000L
-        internal const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_MS * 5
-
         // Mapbox style and layers ids
         internal const val ROUTE_LAYER_ID = "route_layer"
         internal const val ROUTE_SOURCE_ID = "route_source"
