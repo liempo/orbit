@@ -81,6 +81,9 @@ class AuthFragment : Fragment(), CoroutineScope {
                 // Run call and get response with context
                 val response =  login(username, password)
 
+                // Log adminId
+                Timber.d("adminId: ${response.adminId}")
+
                 // Show error if error is not empty
                 if (response.error.isNotEmpty())
                     Toast.makeText(context,
@@ -145,7 +148,7 @@ class AuthFragment : Fragment(), CoroutineScope {
     private data class LoginResponse(
         @Json(name = "token") val token: String = "",
         @Json(name = "user_id") val userId: String = "",
-        @Json(name = "admin_d") val adminId: String = "",
+        @Json(name = "admin_id") val adminId: String = "",
         val error: String = ""
     )
 }

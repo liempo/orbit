@@ -22,4 +22,9 @@
     <string name="format_distance_meters">%.2f m</string>
     <string name="error_route_failed">Failed to find a route</string>
 
+    <!--  Nav fragment strings  -->
+    <string name="format_location_centrifuge">
+        {\"latitude\": %f, \"longitude\": %f}
+    </string>
+
 </resources>

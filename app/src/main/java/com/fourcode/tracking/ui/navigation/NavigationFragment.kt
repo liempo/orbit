@@ -31,13 +31,18 @@ class NavigationFragment : Fragment(),
 
     // Authentication token (retrieved in auth frag)
     private var token: String? = null
+    private var adminId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        token = requireActivity().getSharedPreferences(getString(
-                R.string.shared_pref_credentials), MODE_PRIVATE)
-            .getString(getString(R.string.shared_pref_token), null)
+        with (requireActivity().getSharedPreferences(getString(
+            R.string.shared_pref_credentials), MODE_PRIVATE)) {
+
+            token = getString(getString(R.string.shared_pref_token), null)
+            adminId = getString(getString(R.string.shared_pref_admin_id), null)
+        }
+
     }
 
     override fun onCreateView(
@@ -81,13 +86,17 @@ class NavigationFragment : Fragment(),
     override fun onNavigationRunning() {
         // Broadcast if location is acquired
         nav_view.retrieveMapboxNavigation()?.addRawLocationListener {
-            Timber.d("NavLocation: (${it.latitude}, ${it.longitude})")
-//            client.publish("", null, this)
+            val dataToSend = getString(R.string.format_location_centrifuge,
+                it.latitude, it.longitude)
+            Timber.d("DataToSend: $dataToSend")
+
+            client.publish("location:$adminId",
+                dataToSend.toByteArray(), this)
         }
     }
 
     override fun onDone(error: ReplyError?, result: PublishResult?) {
-
+        if (error != null) Timber.e(error.message)
     }
 
     override fun onFailure(e: Throwable?) { Timber.e(e) }
