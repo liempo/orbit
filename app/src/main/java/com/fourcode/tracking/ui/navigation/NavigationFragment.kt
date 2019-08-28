@@ -16,10 +16,9 @@ import com.fourcode.tracking.R
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener
-import com.mapbox.services.android.navigation.v5.milestone.Milestone
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
+import com.mapbox.services.android.navigation.v5.milestone.*
+import com.mapbox.services.android.navigation.v5.routeprogress.*
 import io.github.centrifugal.centrifuge.*
 
 import kotlinx.android.synthetic.main.fragment_navigation.*
@@ -70,15 +69,20 @@ class NavigationFragment : Fragment(),
         // Init and star navigation
         nav_view.onCreate(savedInstanceState)
         nav_view.initialize {
+            val directions = DirectionsRoute.fromJson(args.routeJson)
 
             // Start navigation when nav_view is initialized
-            val options = NavigationViewOptions.builder()
-                .directionsRoute(DirectionsRoute.fromJson(args.routeJson))
+            val builder = NavigationViewOptions.builder()
+                .directionsRoute(directions)
                 .navigationListener(this)
                 .milestoneEventListener(this)
                 .progressChangeListener(this)
-                .build()
-            nav_view.startNavigation(options)
+
+            // Enable route simulation so i don't have to code in a car
+            if (args.simulate) builder.locationEngine(
+                ReplayRouteLocationEngine().apply { assign(directions) })
+
+            nav_view.startNavigation(builder.build())
 
         }
     }
@@ -127,6 +131,7 @@ class NavigationFragment : Fragment(),
 
     override fun onDone(error: ReplyError?, result: PublishResult?) {
         if (error != null) Timber.e(error.message)
+        else Timber.d("Published new data to centrifugal server")
     }
 
     override fun onFailure(e: Throwable?) { Timber.e(e) }
