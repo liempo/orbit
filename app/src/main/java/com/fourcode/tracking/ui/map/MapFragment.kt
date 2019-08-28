@@ -254,6 +254,14 @@ class MapFragment : Fragment(),
                     .startNavigation(it.toJson()))
             }
         }
+        navigate_fab.setOnLongClickListener {
+            model.route.value?.let {
+                findNavController().navigate(MapFragmentDirections
+                    .startNavigation(it.toJson(), true))
+            }
+
+            true
+        }
 
         // Hide initially while destinations is empty
         navigate_fab.hide()

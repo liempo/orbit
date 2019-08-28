@@ -13,9 +13,8 @@
         <action
             android:id="@+id/startMap"
             app:destination="@id/mapFragment"
-            app:launchSingleTop="true"
-            app:popUpTo="@+id/nav_graph_main"
-            app:popUpToInclusive="true" />
+            app:launchSingleTop="false"
+            app:popUpToInclusive="false" />
         <argument
             android:name="logout"
             app:argType="boolean"
@@ -42,6 +41,10 @@
         <argument
             android:name="routeJson"
             app:argType="string" />
+        <argument
+            android:name="simulate"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 
 </navigation>
