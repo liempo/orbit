@@ -21,6 +21,7 @@
     <string name="format_distance_kilometers">%.2f km</string>
     <string name="format_distance_meters">%.2f m</string>
     <string name="error_route_failed">Failed to find a route</string>
+    <string name="error_already_added">%s is already on the list.</string>
 
     <!--  Nav fragment strings  -->
     <string name="format_location_centrifuge">

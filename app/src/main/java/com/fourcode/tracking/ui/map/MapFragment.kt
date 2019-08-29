@@ -43,6 +43,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
@@ -117,7 +118,7 @@ class MapFragment : Fragment(),
 
             // Will run once
             if (it.size == 1) {
-                bottom_sheet_title.visibility = View.GONE
+                add_destination_title_button.visibility = View.GONE
                 bottom_sheet_header.visibility = View.VISIBLE
             }
         })
@@ -134,7 +135,7 @@ class MapFragment : Fragment(),
                 navigate_fab.hide()
 
                 // Hide headers
-                bottom_sheet_title.visibility = View.VISIBLE
+                add_destination_title_button.visibility = View.VISIBLE
                 bottom_sheet_header.visibility = View.INVISIBLE
 
                 // Remove route on map
@@ -248,6 +249,8 @@ class MapFragment : Fragment(),
 
         // Setup some pretty simple stuff
         add_destination_fab.setOnClickListener { startAutocomplete() }
+        add_destination_title_button.setOnClickListener { startAutocomplete() }
+
         navigate_fab.setOnClickListener {
             model.route.value?.let {
                 findNavController().navigate(MapFragmentDirections
@@ -290,8 +293,14 @@ class MapFragment : Fragment(),
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == AUTOCOMPLETE_REQUEST)
             with (PlaceAutocomplete.getPlace(data)) {
-                model.destinations.add(this)
-                adapter.add(this)
+
+                // Check first if this is the last item in view model
+                if (model.destinations.value?.last()?.id() != id())
+                    model.destinations.add(this)
+                else Snackbar.make(map_view,
+                    getString(R.string.error_already_added, text()),
+                    Snackbar.LENGTH_SHORT).show()
+
             }
     }
 
@@ -304,6 +313,9 @@ class MapFragment : Fragment(),
         newList.add(item)
         // Change value (will notify observers)
         this.value = newList
+
+        if (item is CarmenFeature)
+            adapter.add(item)
     }
 
     private fun initializeMapComponents(style: Style) {

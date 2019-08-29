@@ -49,44 +49,44 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/sheet_peek_height"
                 android:layout_marginEnd="@dimen/sheet_header_margin_end"
-                android:padding="@dimen/sheet_header_padding"
                 android:orientation="horizontal"
+                android:padding="@dimen/sheet_header_padding"
                 android:visibility="invisible"
-                tools:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="invisible">
 
                 <TextView
-                    tools:text="420.69 km"
                     android:id="@+id/total_distance_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="@string/msg_loading"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:gravity="center"
                     android:layout_marginEnd="@dimen/sheet_header_details_margine_end"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:drawableStart="@drawable/ic_near_me_accent_24dp"
-                    android:drawablePadding="@dimen/sheet_header_drawable_padding"/>
+                    android:drawablePadding="@dimen/sheet_header_drawable_padding"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/msg_loading"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    tools:text="420.69 km" />
 
                 <TextView
-                    tools:text="11h 24m"
                     android:id="@+id/total_duration_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="@string/msg_loading"
-                    android:gravity="center"
                     android:layout_marginEnd="@dimen/sheet_header_details_margine_end"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:drawableStart="@drawable/ic_access_time_accent_24dp"
-                    android:drawablePadding="@dimen/sheet_header_drawable_padding"/>
+                    android:drawablePadding="@dimen/sheet_header_drawable_padding"
+                    android:gravity="center"
+                    android:text="@string/msg_loading"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    tools:text="11h 24m" />
 
             </LinearLayout>
 
             <TextView
-                android:id="@+id/bottom_sheet_title"
+                android:id="@+id/add_destination_title_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/sheet_peek_height"
                 android:layout_marginEnd="@dimen/sheet_header_margin_end"
@@ -97,7 +97,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="invisible" />
+                tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/destinations_recycler_view"
