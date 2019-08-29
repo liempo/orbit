@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -14,6 +13,7 @@ import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.auth_fragment.*
 import kotlinx.coroutines.*
 import okhttp3.FormBody
@@ -72,7 +72,7 @@ class AuthFragment : Fragment(), CoroutineScope {
             if (password.isBlank()) password_input_layout.error =
                 getString(R.string.error_field_required)
 
-            if (username.isBlank().not() && password.isBlank().not()) launch {
+            if (username.isNotBlank() && password.isNotBlank()) launch {
                 // Disable UI components while call
                 username_input_layout.isEnabled = false
                 password_input_layout.isEnabled = false
@@ -84,12 +84,8 @@ class AuthFragment : Fragment(), CoroutineScope {
                 // Log adminId
                 Timber.d("adminId: ${response.adminId}")
 
-                // Show error if error is not empty
-                if (response.error.isNotEmpty())
-                    Toast.makeText(context,
-                        response.error,
-                        Toast.LENGTH_LONG).show()
-                else {
+
+                if (response.adminId.isNotEmpty()) {
                     // Save credentials locally (this means user is logged in)
                     sharedPreferences.edit {
                         putString(getString(R.string
@@ -102,7 +98,9 @@ class AuthFragment : Fragment(), CoroutineScope {
 
                     // Start mapFragment
                     findNavController().navigate(R.id.mapFragment)
-                }
+                } else
+                    // Show error if error is not empty
+                     Snackbar.make(view, response.error, Snackbar.LENGTH_SHORT).show()
 
                 // Enable UI componente
                 username_input_layout.isEnabled = true
