@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Tracking</string>
+
+    <string name="url_splash_video">https://raw.githubusercontent.com/fourcodeco/tracking-android/master/extras/splash.mp4</string>
 </resources>
