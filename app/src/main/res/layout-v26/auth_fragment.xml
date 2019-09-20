@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="Autofill,ContentDescription">
+    tools:ignore=",ContentDescription">
 
     <egolabsapps.basicodemine.videolayout.VideoLayout
         android:id="@+id/videoLayout"
@@ -51,7 +51,8 @@
                     android:padding="@dimen/text_input_layout_padding"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/banner" />
+                    app:layout_constraintTop_toBottomOf="@id/banner"
+                    android:autofillHints="emailAddress" />
 
                 <EditText
                     android:id="@+id/password_input"
@@ -65,7 +66,8 @@
                     android:padding="@dimen/text_input_layout_padding"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/username_or_email_input" />
+                    app:layout_constraintTop_toBottomOf="@id/username_or_email_input"
+                    android:autofillHints="password" />
 
                 <Button
                     android:id="@+id/login_button"
