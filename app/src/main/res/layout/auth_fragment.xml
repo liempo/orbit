@@ -9,9 +9,9 @@
         android:id="@+id/video_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/splash"
         app:video_gravity="centerCrop"
-        app:path_or_url="default.mp4"
-        tools:background="@drawable/splash">
+        app:path_or_url="@string/url_splash_video_default">
 
         <ScrollView
 

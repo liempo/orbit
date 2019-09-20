@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.auth_fragment.*
 
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
+import kotlin.random.Random
 
 
 class AuthFragment : Fragment(), CoroutineScope {
@@ -34,6 +35,11 @@ class AuthFragment : Fragment(), CoroutineScope {
         container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // Randomize splash screen
+        video_layout.setPathOrUrl(
+            getString(R.string.url_splash_video_format,
+                Random.nextInt(1, 5))
+        )
 
         // Initialize shared preferences object, for credentials
         val sharedPreferences =
