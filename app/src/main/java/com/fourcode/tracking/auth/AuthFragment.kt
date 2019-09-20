@@ -41,11 +41,11 @@ class AuthFragment : Fragment(), CoroutineScope {
                 getString(R.string.shared_pref_credentials), MODE_PRIVATE)
 
         // Check if logged in first
-        val loggedInId = sharedPreferences.getString(
-            getString(R.string.shared_pref_admin_id), null)
+        // val loggedInId = sharedPreferences.getString(
+        //   getString(R.string.shared_pref_admin_id), null)
 
-//        if (loggedInId.isNullOrBlank().not())
-//            // TODO
+        // if (loggedInId.isNullOrBlank().not())
+        // TODO navigate to next fragment
 
         login_button.setOnClickListener {
             val username = username_or_email_input.text.toString()
@@ -63,27 +63,40 @@ class AuthFragment : Fragment(), CoroutineScope {
                 password_input.isEnabled = false
                 login_button.isEnabled = false
 
+                // Check if is an admin (standard user does not login with email)
+                val isAdmin = isEmailValid(username)
+                if (isAdmin) Snackbar.make(view,
+                    R.string.msg_logging_in_as_admin,
+                    Snackbar.LENGTH_LONG)
+                    .show()
+
                 // Run call and get response with context
-                val response =  login(username, password)
+                val response =
+                    if (isAdmin) startAdminLogin(username, password)
+                    else startStandardLogin(username, password)
 
-                // Log adminId
-                Timber.d("adminId: ${response.adminId}")
+                if (response.id.isNotEmpty()) {
+                    Timber.d("Logged in with id: ${response.id}")
 
-                if (response.adminId.isNotEmpty()) {
                     // Save credentials locally (this means user is logged in)
                     sharedPreferences.edit {
                         putString(getString(R.string
                             .shared_pref_token), response.token)
                         putString(getString(R.string
-                            .shared_pref_admin_id), response.adminId)
-                        putString(getString(R.string
-                            .shared_pref_user_id), response.userId)
-                    }
+                            .shared_pref_id), response.id)
 
+                        // if user is standard, adminId must be presenst
+                        if (isAdmin.not()) putString(
+                            getString(R.string.shared_pref_admin_id),
+                            (response as StandardLoginResponse).adminId)
+                    }
 
                 } else
                 // Show error if error is not empty
-                    Snackbar.make(view, response.error, Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(view,
+                        response.error,
+                        Snackbar.LENGTH_SHORT)
+                        .show()
 
                 // Enable UI componente
                 username_or_email_input.isEnabled = true
@@ -94,7 +107,29 @@ class AuthFragment : Fragment(), CoroutineScope {
 
     }
 
-    private suspend fun login(username: String, password: String): LoginResponse {
+    private suspend fun isEmailValid(email: String): Boolean {
+
+        // Fucking hell, this is an over kill
+        val regex = Regex("(?:[a-z0-9!#\$%&'*+/=?^_`{|}~-]+(?:" +
+                "\\.[a-z0-9!#\$%&'*+/=?^_`{|}~-]+)*|\"" +
+                "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f" +
+                "\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-" +
+                "\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:" +
+                "(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
+                "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:" +
+                "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.)" +
+                "{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|" +
+                "[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c" +
+                "\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[" +
+                "\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")
+
+        return withContext(Dispatchers.Main) {
+            email.matches(regex)
+        }
+    }
+
+    private suspend fun startStandardLogin(
+        username: String, password: String): StandardLoginResponse {
         // Create an okhttp3
         val client = OkHttpClient()
 
@@ -117,21 +152,62 @@ class AuthFragment : Fragment(), CoroutineScope {
             val response = client.newCall(request).execute()
 
             // Parse response
-            return@withContext Klaxon().parse<LoginResponse>(
+            return@withContext Klaxon().parse<StandardLoginResponse>(
+                response.body!!.string())!!
+        }
+    }
+
+    private suspend fun startAdminLogin(
+        email: String, password: String): AdminLoginResponse {
+        // Create an okhttp3
+        val client = OkHttpClient()
+
+        // Create request body
+        val body = FormBody.Builder()
+            .add("email", email)
+            .add("password", password)
+            .build()
+
+        // Create OkHttpRequest
+        val request = Request.Builder()
+            .url(BuildConfig.AuthApiUrl + "login/admin")
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Accept", "application/json")
+            .post(body)
+            .build()
+
+        return withContext(Dispatchers.IO) {
+            // Execute request and get response
+            val response = client.newCall(request).execute()
+
+            // Parse response
+            return@withContext Klaxon().parse<AdminLoginResponse>(
                 response.body!!.string())!!
         }
     }
 
     override fun onDestroy() {
-        // Cancel all running coroutines
+        // Cancel all running co-routines
         job.cancel(); super.onDestroy()
     }
 
-    private data class LoginResponse(
-        @Json(name = "token") val token: String = "",
-        @Json(name = "user_id") val userId: String = "",
+    interface LoginResponse {
+        @Json(name = "token") val token: String
+        val id: String
+        val error: String
+    }
+
+    private data class StandardLoginResponse(
+        override val token: String,
         @Json(name = "admin_id") val adminId: String = "",
-        val error: String = ""
-    )
+        @Json(name = "user_id") override val id: String = "",
+        override val error: String = ""
+    ) : LoginResponse
+
+    private data class AdminLoginResponse(
+        override val token: String,
+        @Json(name = "id") override val id: String = "",
+        override val error: String = ""
+    ) : LoginResponse
 
 }
