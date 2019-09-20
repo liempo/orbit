@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--  Auth fragment dimens  -->
+    <dimen name="text_input_layout_height">72dp</dimen>
+    <dimen name="text_input_layout_padding">12dp</dimen>
+</resources>
