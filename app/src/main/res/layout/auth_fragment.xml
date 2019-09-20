@@ -45,6 +45,7 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/shape_edit_text_background"
                 android:hint="@string/hint_username"
+                android:textColorHint="@color/colorPrimaryAccent"
                 android:inputType="text"
                 android:padding="@dimen/text_input_layout_padding"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -58,6 +59,7 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/shape_edit_text_background"
                 android:hint="@string/hint_password"
+                android:textColorHint="@color/colorPrimaryAccent"
                 android:inputType="textPassword"
                 android:padding="@dimen/text_input_layout_padding"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -72,8 +74,8 @@
                 android:layout_marginBottom="24dp"
                 android:padding="12dp"
                 android:text="@string/action_login"
+                android:textColor="@color/colorPrimaryText"
                 android:background="@drawable/shape_button_background"
-
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/password_input" />
