@@ -58,21 +58,13 @@ class AuthFragment : Fragment(), CoroutineScope {
         if (loggedInId.isNullOrBlank().not() )
              findNavController().navigate(
                  if (isLoggedInUserAdmin)
-                     AuthFragmentDirections.startStandard()
-                else AuthFragmentDirections.startAdmin()
+                     AuthFragmentDirections.startAdmin()
+                else AuthFragmentDirections.startStandard()
              )
 
-        // Will make things faster if i don't initialize
-        // the login_button's listener if above statement is true
-        else login_button.setOnClickListener {
+        login_button.setOnClickListener {
             val username = username_or_email_input.text.toString()
             val password = password_input.text.toString()
-
-            // Check first if fields are empty
-            if (username.isBlank() || password.isBlank())
-                Snackbar.make(view,
-                    R.string.error_missing_fields,
-                    Snackbar.LENGTH_SHORT).show()
 
             if (username.isNotBlank() && password.isNotBlank()) launch {
                 // Disable UI components while call
@@ -108,6 +100,11 @@ class AuthFragment : Fragment(), CoroutineScope {
                             (response as StandardLoginResponse).adminId)
                     }
 
+                    findNavController().navigate(
+                        if (isAdmin) AuthFragmentDirections.startAdmin()
+                        else AuthFragmentDirections.startStandard()
+                    )
+
                 } else
                 // Show error if error is not empty
                     Snackbar.make(view,
@@ -119,7 +116,9 @@ class AuthFragment : Fragment(), CoroutineScope {
                 username_or_email_input.isEnabled = true
                 password_input.isEnabled = true
                 login_button.isEnabled = true
-            }
+            } else Snackbar.make(view,
+                R.string.error_missing_fields,
+                Snackbar.LENGTH_SHORT).show()
         }
 
     }
