@@ -9,5 +9,24 @@
         android:id="@+id/authFragment"
         android:name="com.fourcode.tracking.auth.AuthFragment"
         android:label="auth_fragment"
-        tools:layout="@layout/auth_fragment" />
+        tools:layout="@layout/auth_fragment" >
+        <action
+            android:id="@+id/startStandard"
+            app:destination="@+id/standardFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/graph_main"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/startAdmin"
+            app:destination="@id/placeholder"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/graph_main"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/standardFragment"
+        android:name="com.fourcode.tracking.standard.home.StandardFragment"
+        android:label="fragment_standard"
+        tools:layout="@layout/fragment_standard" />
+    <fragment android:id="@+id/placeholder" />
 </navigation>

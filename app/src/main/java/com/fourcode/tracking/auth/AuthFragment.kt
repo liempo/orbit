@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.core.content.edit
 import android.content.Context.MODE_PRIVATE
+import androidx.navigation.fragment.findNavController
 
 import com.google.android.material.snackbar.Snackbar
 
@@ -47,13 +48,23 @@ class AuthFragment : Fragment(), CoroutineScope {
                 getString(R.string.shared_pref_credentials), MODE_PRIVATE)
 
         // Check if logged in first
-        // val loggedInId = sharedPreferences.getString(
-        //   getString(R.string.shared_pref_admin_id), null)
+        val loggedInId = sharedPreferences.getString(
+           getString(R.string.shared_pref_id), null)
 
-        // if (loggedInId.isNullOrBlank().not())
-        // TODO navigate to next fragment
+        // Check user type (standard or admin)
+        val isLoggedInUserAdmin = (sharedPreferences.getString(
+            getString(R.string.shared_pref_admin_id), null)  == null)
 
-        login_button.setOnClickListener {
+        if (loggedInId.isNullOrBlank().not() )
+             findNavController().navigate(
+                 if (isLoggedInUserAdmin)
+                     AuthFragmentDirections.startStandard()
+                else AuthFragmentDirections.startAdmin()
+             )
+
+        // Will make things faster if i don't initialize
+        // the login_button's listener if above statement is true
+        else login_button.setOnClickListener {
             val username = username_or_email_input.text.toString()
             val password = password_input.text.toString()
 
@@ -114,7 +125,6 @@ class AuthFragment : Fragment(), CoroutineScope {
     }
 
     private suspend fun isEmailValid(email: String): Boolean {
-
         // Fucking hell, this is an over kill
         val regex = Regex("(?:[a-z0-9!#\$%&'*+/=?^_`{|}~-]+(?:" +
                 "\\.[a-z0-9!#\$%&'*+/=?^_`{|}~-]+)*|\"" +
