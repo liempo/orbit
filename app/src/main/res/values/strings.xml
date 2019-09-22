@@ -21,6 +21,8 @@
     <string name="action_search">Search</string>
     <string name="action_logout">Logout</string>
     <string name="action_add_destination">Add destination</string>
+    <string name="action_clear_all">Clear All</string>
+    <string name="action_show_favorites">Show Favorites</string>
     <string name="msg_loading">Loading</string>
 
 </resources>

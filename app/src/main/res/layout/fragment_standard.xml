@@ -11,7 +11,7 @@
         android:id="@+id/destinations_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:listitem="@layout/item_destination"/>
+        tools:listitem="@layout/item_destination" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottom_app_bar"
@@ -19,8 +19,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:menu="@menu/menu_standard"
-        app:fabAlignmentMode="end"/>
+        app:navigationIcon="@drawable/ic_menu_white_24dp"
+        app:menu="@menu/menu_bottom_app_bar_standard"
+        app:fabAlignmentMode="center"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/navigate_fab"

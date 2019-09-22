@@ -2,10 +2,8 @@ package com.fourcode.tracking.standard.home
 
 
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 
 import com.fourcode.tracking.R
 
