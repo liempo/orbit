@@ -164,11 +164,15 @@ class AuthFragment : Fragment(), CoroutineScope {
 
         return withContext(Dispatchers.IO) {
             // Execute request and get response
-            val response = client.newCall(request).execute()
+            val response = client.newCall(request).execute().body!!
 
-            // Parse response
-            return@withContext Klaxon().parse<StandardLoginResponse>(
-                response.body!!.string())!!
+            // Parse result before closing response
+            val result = Klaxon().parse<StandardLoginResponse>(response.string())!!
+
+            // Close response to avoid leaks
+            response.close()
+
+            return@withContext result
         }
     }
 
@@ -193,11 +197,15 @@ class AuthFragment : Fragment(), CoroutineScope {
 
         return withContext(Dispatchers.IO) {
             // Execute request and get response
-            val response = client.newCall(request).execute()
+            val response = client.newCall(request).execute().body!!
 
-            // Parse response
-            return@withContext Klaxon().parse<AdminLoginResponse>(
-                response.body!!.string())!!
+            // Parse result before closing response
+            val result = Klaxon().parse<AdminLoginResponse>(response.string())!!
+
+            // Close response to avoid leaks
+            response.close()
+
+            return@withContext result
         }
     }
 
