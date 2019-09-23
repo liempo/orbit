@@ -6,8 +6,13 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorPrimaryAccent</item>
+
+        <!-- Disable action bar here -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
+        <!-- Fix for bottom app bar's overflow menu -->
+        <item name="android:textColorSecondary">@android:color/white</item>
     </style>
 
 </resources>
