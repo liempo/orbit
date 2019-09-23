@@ -6,13 +6,12 @@
     android:id="@+id/video_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/splash"
     app:path_or_url="@string/url_splash_video_default"
     app:video_gravity="centerCrop"
-    tools:background="@drawable/splash"
-    tools:ignore=",ContentDescription">
+    tools:ignore="ContentDescription">
 
     <ScrollView
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
@@ -28,6 +27,7 @@
                 android:id="@+id/banner"
                 android:layout_width="256dp"
                 android:layout_height="256dp"
+                android:padding="32dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
                 android:scaleType="centerCrop"
@@ -40,7 +40,7 @@
                 android:id="@+id/username_or_email_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="72dp"
+                android:autofillHints="emailAddress"
                 android:background="@drawable/shape_edit_text_background"
                 android:hint="@string/hint_username_or_email"
                 android:inputType="textEmailAddress"
@@ -48,15 +48,13 @@
                 android:textColorHint="@color/colorPrimaryAccent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/banner"
-                android:autofillHints="emailAddress" />
+                app:layout_constraintTop_toBottomOf="@id/banner" />
 
             <EditText
                 android:id="@+id/password_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:autofillHints="password"
                 android:background="@drawable/shape_edit_text_background"
                 android:hint="@string/hint_password"
                 android:inputType="textPassword"
@@ -64,7 +62,8 @@
                 android:textColorHint="@color/colorPrimaryAccent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/username_or_email_input" />
+                app:layout_constraintTop_toBottomOf="@id/username_or_email_input"
+                android:autofillHints="password" />
 
             <Button
                 android:id="@+id/login_button"
