@@ -12,6 +12,7 @@ import com.fourcode.tracking.R
 import com.mapbox.geojson.Point
 
 import kotlinx.android.synthetic.main.item_waypoint.view.*
+import timber.log.Timber
 
 class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
 
@@ -28,21 +29,26 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
         // Get item
         val item = items[position]
 
+        // Log all items' positions
+        items.forEach {
+            Timber.d("${it.name}, ${it.position}")
+        }
+
         // Set name to item name
         holder.name.text = item.name
 
+        holder.favorite.setOnClickListener {
+            // TODO Add to room
+        }
+
+        holder.start.visibility = View.INVISIBLE
+        holder.end.visibility = View.INVISIBLE
+
         when (item.position) {
             Waypoint.Position.START -> {
-                if (items.size > 1)
+                if (itemCount > 1)
                     holder.start.visibility = View.VISIBLE
-
-                holder.name.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.ic_my_location_primary_dark_24dp,
-                    0, 0, 0
-                )
-
-                holder.delete.visibility = View.GONE
-                holder.favorite.visibility = View.GONE
+                holder.location.visibility = View.VISIBLE
             }
 
             Waypoint.Position.MIDDLE -> {
@@ -69,25 +75,19 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
     }
 
     internal fun add(destination: Waypoint) {
-        // Set middle to true to enable full icon
-        if (items.last().position != Waypoint.Position.START)
+        // Update previous item's icon
+        if (items.lastIndex != 0) {
             items[items.lastIndex] = items[items.lastIndex]
-                .apply {
-                    position = Waypoint.Position.MIDDLE
-                }; notifyItemChanged(items.lastIndex)
+                .apply { position = Waypoint.Position.MIDDLE }
+            notifyItemChanged(items.lastIndex)
+        }
 
         // Add new data
         items.add(destination)
         notifyDataSetChanged()
     }
 
-    internal fun delete(position: Int) {
-        items.removeAt(position)
-        notifyItemRemoved(position)
-    }
-
     internal fun last() = items.last()
-
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
 
@@ -96,8 +96,8 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
         val end: ImageView = view.left_line_icon_top
 
         val name: TextView = view.destination_name
+        val location: ImageView = view.my_location
         val favorite: ImageButton = view.favorite_button
-        val delete: ImageButton = view.delete_button
 
     }
 

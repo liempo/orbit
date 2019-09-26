@@ -67,6 +67,7 @@ class StandardFragment : Fragment(), PermissionsListener {
             layoutManager = LinearLayoutManager(context)
             this@StandardFragment.adapter = WaypointsAdapter()
             adapter = this@StandardFragment.adapter
+            setItemViewCacheSize(0)
         }
 
         add_destination_button.setOnClickListener {

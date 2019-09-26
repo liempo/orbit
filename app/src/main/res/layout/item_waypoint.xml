@@ -47,7 +47,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        app:cardElevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/vertical"
@@ -56,23 +55,31 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/content_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:visibility="invisible">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/destination_name"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginStart="24dp"
+                android:drawablePadding="8dp"
                 android:gravity="start|center"
                 android:text="@string/msg_loading"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:drawablePadding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/favorite_button"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/buttons_guideline"
                 tools:text="Villa de Calamba" />
+
+            <ImageView
+                android:id="@+id/my_location"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:src="@drawable/ic_my_location_primary_dark_24dp"
+                android:visibility="invisible"
+                app:layout_constraintStart_toStartOf="@+id/buttons_guideline" />
 
             <ImageButton
                 android:id="@+id/favorite_button"
@@ -81,16 +88,14 @@
                 android:background="@android:color/transparent"
                 android:padding="8dp"
                 android:src="@drawable/ic_favorite_border_primary_dark_24dp"
-                app:layout_constraintEnd_toStartOf="@id/delete_button" />
+                app:layout_constraintStart_toEndOf="@id/my_location"/>
 
-            <ImageButton
-                android:id="@+id/delete_button"
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/buttons_guideline"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent"
-                android:padding="8dp"
-                android:src="@drawable/ic_delete_primary_dark_24dp"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_end="80dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
