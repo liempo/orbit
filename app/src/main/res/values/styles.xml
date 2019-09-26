@@ -11,7 +11,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <!-- Fix for bottom app bar's overflow menu -->
+        <!-- Fix for start app bar's overflow menu -->
         <item name="android:textColorSecondary">@android:color/white</item>
     </style>
 
