@@ -8,10 +8,10 @@
     tools:context=".standard.home.StandardFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/destinations_recycler_view"
+        android:id="@+id/waypoints_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:listitem="@layout/item_destination" />
+        tools:listitem="@layout/item_waypoint" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottom_app_bar"
