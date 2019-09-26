@@ -3,7 +3,6 @@ package com.fourcode.tracking.standard.home
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fourcode.tracking.BuildConfig
 
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
@@ -11,16 +10,21 @@ import com.mapbox.api.geocoding.v5.GeocodingCriteria
 import com.mapbox.api.geocoding.v5.MapboxGeocoding
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import timber.log.Timber
 import java.lang.Exception
+
+import com.fourcode.tracking.BuildConfig
+import com.fourcode.tracking.standard.home.WaypointsAdapter.Waypoint
+
 class StandardViewModel: ViewModel(),
     LocationEngineCallback<LocationEngineResult> {
 
-    val origin: MutableLiveData<Waypoint> = MutableLiveData()
+    internal val origin: MutableLiveData<Waypoint> = MutableLiveData()
 
     private suspend fun reverseGeocode(point: Point): GeocodingResponse =
         withContext(Dispatchers.IO) {
@@ -60,10 +64,5 @@ class StandardViewModel: ViewModel(),
     override fun onFailure(exception: Exception) {
         Timber.e(exception, "Error retrieving location")
     }
-
-    data class Waypoint(
-        val name: String,
-        val point: Point
-    )
 }
 

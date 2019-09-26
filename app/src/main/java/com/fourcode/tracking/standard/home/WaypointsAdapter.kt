@@ -9,13 +9,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 import com.fourcode.tracking.R
+import com.mapbox.geojson.Point
 
 import kotlinx.android.synthetic.main.item_waypoint.view.*
 
 class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
 
-    private val items =
-        arrayListOf<StandardViewModel.Waypoint>()
+    private val items = arrayListOf<Waypoint>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
             ViewHolder = ViewHolder(LayoutInflater.from(parent.context)
@@ -25,28 +25,40 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
     override fun getItemCount(): Int = items.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        // Get item
+        val item = items[position]
 
-        // Create item from position
-        holder.name.text = items[position].name
+        // Set name to item name
+        holder.name.text = item.name
 
-        if (position == 0)
-            holder.name.context.let { ctx ->
+        when (item.position) {
+            Waypoint.Position.START -> {
                 if (items.size > 1)
                     holder.start.visibility = View.VISIBLE
 
                 holder.name.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_my_location_primary_dark_24dp,
-                    0, 0, 0)
+                    0, 0, 0
+                )
 
                 holder.delete.visibility = View.GONE
                 holder.favorite.visibility = View.GONE
             }
-        else if (position == items.lastIndex && items.size > 0)
-            holder.end.visibility = View.VISIBLE
 
+            Waypoint.Position.MIDDLE -> {
+                holder.start.visibility = View.VISIBLE
+                holder.end.visibility = View.VISIBLE
+            }
+
+            Waypoint.Position.END -> {
+                holder.end.visibility = View.VISIBLE
+            }
+        }
     }
 
-    internal fun origin(destination: StandardViewModel.Waypoint) {
+    internal fun origin(destination: Waypoint) {
+        destination.position = Waypoint.Position.START
+
         if (items.size > 0) {
             items[0] = destination
             notifyItemChanged(0)
@@ -56,7 +68,15 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
         }
     }
 
-    internal fun add(destination: StandardViewModel.Waypoint) {
+    internal fun add(destination: Waypoint) {
+        // Set middle to true to enable full icon
+        if (items.last().position != Waypoint.Position.START)
+            items[items.lastIndex] = items[items.lastIndex]
+                .apply {
+                    position = Waypoint.Position.MIDDLE
+                }; notifyItemChanged(items.lastIndex)
+
+        // Add new data
         items.add(destination)
         notifyDataSetChanged()
     }
@@ -65,6 +85,8 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
         items.removeAt(position)
         notifyItemRemoved(position)
     }
+
+    internal fun last() = items.last()
 
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
@@ -77,5 +99,15 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
         val favorite: ImageButton = view.favorite_button
         val delete: ImageButton = view.delete_button
 
+    }
+
+    internal data class Waypoint(
+        val name: String,
+        val point: Point,
+        var position: Position = Position.END
+    ) {
+        enum class Position {
+            START, MIDDLE, END
+        }
     }
 }

@@ -24,5 +24,6 @@
     <string name="action_clear_all">Clear All</string>
     <string name="action_show_favorites">Show Favorites</string>
     <string name="msg_loading">Loading</string>
+    <string name="error_already_added">%s is already on the list.</string>
 
 </resources>
