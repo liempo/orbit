@@ -53,19 +53,6 @@
         app:layout_constraintStart_toEndOf="@+id/vertical"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/add_destination"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:drawableStart="@drawable/ic_add_black_24dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="@string/action_add_destination"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:visibility="invisible"
-            tools:visibility="visible" />
-
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/content_layout"
             android:layout_width="match_parent"
@@ -80,6 +67,7 @@
                 android:gravity="start|center"
                 android:text="@string/msg_loading"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:drawablePadding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/favorite_button"
                 app:layout_constraintStart_toStartOf="parent"
