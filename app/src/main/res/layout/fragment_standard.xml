@@ -21,7 +21,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/route_details_card_view"
                 android:layout_width="0dp"
-                android:layout_height="128dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
@@ -32,13 +32,14 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="8dp">
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="@dimen/route_details_layout_padding"
                         android:orientation="horizontal">
 
                         <TextView
@@ -62,6 +63,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/route_details_layout_padding"
+                        android:layout_marginBottom="@dimen/route_details_layout_padding"
                         android:orientation="horizontal">
 
                         <TextView
@@ -86,6 +89,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/route_details_layout_padding"
+                        android:layout_marginBottom="@dimen/route_details_layout_padding"
                         android:orientation="horizontal">
 
                         <TextView
@@ -109,13 +114,13 @@
                     <Button
                         android:id="@+id/add_destination_button"
                         style="@style/Widget.AppCompat.Button.Borderless"
+                        android:layout_margin="@dimen/route_details_layout_padding"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/ic_add_black_24dp"
                         android:drawablePadding="8dp"
                         android:gravity="center"
                         android:layout_gravity="center"
-                        android:padding="12dp"
                         android:text="@string/action_add_destination" />
 
                 </LinearLayout>
@@ -144,7 +149,7 @@
         android:layout_gravity="bottom"
         app:hideOnScroll="true"
         app:navigationIcon="@drawable/ic_menu_white_24dp"
-        app:menu="@menu/menu_bottom_app_bar_standard"
+        app:menu="@menu/menu_standard_bottom_app_bar"
         app:fabAlignmentMode="center"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
