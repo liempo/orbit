@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import com.fourcode.tracking.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class StandardOptionsBottomDialogFragment: BottomSheetDialogFragment() {
+class OptionsBottomDialogFragment: BottomSheetDialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

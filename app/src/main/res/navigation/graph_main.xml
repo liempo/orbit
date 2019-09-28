@@ -25,7 +25,7 @@
     </fragment>
     <fragment
         android:id="@+id/standardFragment"
-        android:name="com.fourcode.tracking.standard.home.StandardFragment"
+        android:name="com.fourcode.tracking.standard.home.HomeFragment"
         android:label="fragment_standard"
         tools:layout="@layout/fragment_standard" />
     <fragment android:id="@+id/placeholder" />

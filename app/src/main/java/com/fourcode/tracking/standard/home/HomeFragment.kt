@@ -25,7 +25,7 @@ import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 import kotlinx.android.synthetic.main.fragment_standard.*
 import timber.log.Timber
 
-class StandardFragment : Fragment(), PermissionsListener {
+class HomeFragment : Fragment(), PermissionsListener {
 
     // Shared View model for standard log in
     private lateinit var model: StandardViewModel
@@ -64,14 +64,14 @@ class StandardFragment : Fragment(), PermissionsListener {
         // Initialize recycler view
         with (waypoints_recycler_view) {
             layoutManager = LinearLayoutManager(context)
-            this@StandardFragment.adapter = WaypointsAdapter()
-            adapter = this@StandardFragment.adapter
+            this@HomeFragment.adapter = WaypointsAdapter()
+            adapter = this@HomeFragment.adapter
             setItemViewCacheSize(0)
         }
 
         bottom_app_bar.setNavigationOnClickListener {
-            StandardOptionsBottomDialogFragment().apply {
-                show(this@StandardFragment.requireFragmentManager(), tag)
+            OptionsBottomDialogFragment().apply {
+                show(this@HomeFragment.requireFragmentManager(), tag)
             }
         }
 
