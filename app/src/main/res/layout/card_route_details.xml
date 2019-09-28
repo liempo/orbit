@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="@dimen/route_details_layout_padding"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/total_distance_title"
+                android:layout_width="@dimen/route_details_text_view_width"
+                android:layout_height="@dimen/route_details_text_view_height"
+                android:drawableStart="@drawable/ic_place_primary_24dp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:text="@string/title_total_distance" />
+
+            <TextView
+                android:id="@+id/total_distance_text"
+                android:layout_width="128dp"
+                android:layout_height="24dp"
+                android:gravity="center"
+                tools:text="420.69km" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/route_details_layout_padding"
+            android:layout_marginBottom="@dimen/route_details_layout_padding"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/fuel_cost_title"
+                android:layout_width="@dimen/route_details_text_view_width"
+                android:layout_height="@dimen/route_details_text_view_height"
+                android:drawableStart="@drawable/ic_local_gas_station_primary_24dp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:text="@string/title_fuel_cost" />
+
+            <TextView
+                android:id="@+id/fuel_cost_text"
+                android:layout_width="128dp"
+                android:layout_height="24dp"
+                android:gravity="center"
+                tools:text="567.21 PHP" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/route_details_layout_padding"
+            android:layout_marginBottom="@dimen/route_details_layout_padding"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/travel_time_title"
+                android:layout_width="@dimen/route_details_text_view_width"
+                android:layout_height="@dimen/route_details_text_view_height"
+                android:drawableStart="@drawable/ic_access_time_primary_24dp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:text="@string/title_travel_time" />
+
+            <TextView
+                android:id="@+id/travel_time_text"
+                android:layout_width="@dimen/route_details_text_view_width"
+                android:layout_height="@dimen/route_details_text_view_height"
+                android:gravity="center"
+                tools:text="1h 6m, 3:07 AM" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/add_destination_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_margin="@dimen/route_details_layout_padding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_add_black_24dp"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="@string/action_add_destination" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

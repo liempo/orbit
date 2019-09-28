@@ -22,6 +22,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
+import kotlinx.android.synthetic.main.card_route_details.*
 import kotlinx.android.synthetic.main.fragment_standard.*
 import timber.log.Timber
 
