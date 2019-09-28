@@ -34,4 +34,9 @@
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
 
+    <!--  Preference screen (standard) strings  -->
+    <string name="title_fuel_efficiency">Efficiency (km/L)</string>
+    <string name="title_fuel_price">Price of fuel per liter</string>
+    <string name="title_currency">Currency</string>
+
 </resources>

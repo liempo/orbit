@@ -5,28 +5,60 @@
     android:id="@+id/graph_main"
     app:startDestination="@id/authFragment">
 
+    <action
+        android:id="@+id/action_logout"
+        app:destination="@+id/authFragment">
+
+        <argument
+            android:name="toLogout"
+            android:defaultValue="true" />
+
+    </action>
+
     <fragment
         android:id="@+id/authFragment"
         android:name="com.fourcode.tracking.auth.AuthFragment"
         android:label="auth_fragment"
-        tools:layout="@layout/auth_fragment" >
+        tools:layout="@layout/auth_fragment">
+
         <action
             android:id="@+id/startStandard"
             app:destination="@+id/standardFragment"
             app:launchSingleTop="true"
             app:popUpTo="@+id/graph_main"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/startAdmin"
             app:destination="@id/placeholder"
             app:launchSingleTop="true"
             app:popUpTo="@+id/graph_main"
             app:popUpToInclusive="true" />
+
+        <argument
+            android:name="toLogout"
+            android:defaultValue="false"
+            app:argType="boolean" />
+
     </fragment>
+
     <fragment
         android:id="@+id/standardFragment"
         android:name="com.fourcode.tracking.standard.home.HomeFragment"
         android:label="fragment_standard"
-        tools:layout="@layout/fragment_standard" />
+        tools:layout="@layout/fragment_standard">
+
+        <action
+            android:id="@+id/openSettings"
+            app:destination="@id/settingsFragment" />
+
+    </fragment>
+
     <fragment android:id="@+id/placeholder" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.fourcode.tracking.standard.settings.SettingsFragment"
+        android:label="SettingsFragment" />
+
 </navigation>

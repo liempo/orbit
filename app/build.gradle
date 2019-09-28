@@ -51,6 +51,9 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
@@ -71,6 +74,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.1.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'androidx.preference:preference-ktx:1.1.0'
 
     // Third-party open source
     implementation 'com.jakewharton.timber:timber:4.7.1'

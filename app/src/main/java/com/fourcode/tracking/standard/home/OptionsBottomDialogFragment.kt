@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.fourcode.tracking.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.android.synthetic.main.sheet_standard_options.*
 
 class OptionsBottomDialogFragment: BottomSheetDialogFragment() {
 
@@ -16,5 +18,24 @@ class OptionsBottomDialogFragment: BottomSheetDialogFragment() {
         R.layout.sheet_standard_options,
         container, false
     )
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        navigation_view.setNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.menu_settings -> findNavController()
+                    .navigate(HomeFragmentDirections.openSettings())
+
+                R.id.menu_logout -> findNavController()
+                    .navigate(R.id.action_logout)
+            }
+
+            if (view is BottomSheetDialogFragment)
+                view.dismiss()
+
+            true
+        }
+    }
 
 }

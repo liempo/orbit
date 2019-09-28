@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.fourcode.tracking.BuildConfig
@@ -29,6 +30,8 @@ class AuthFragment : Fragment(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
+    private val args: AuthFragmentArgs by navArgs()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,6 +50,13 @@ class AuthFragment : Fragment(), CoroutineScope {
         val sharedPreferences =
             requireActivity().getSharedPreferences(
                 getString(R.string.shared_pref_credentials), MODE_PRIVATE)
+
+        // Logout if toLogout is true
+        if (args.toLogout) sharedPreferences.edit {
+            remove(getString(R.string.shared_pref_id))
+            remove(getString(R.string.shared_pref_token))
+            remove(getString(R.string.shared_pref_admin_id))
+        }
 
         // Check if logged in first
         val loggedInId = sharedPreferences.getString(
