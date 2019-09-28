@@ -26,5 +26,8 @@
     <string name="title_total_distance">Total Distance</string>
     <string name="title_fuel_cost">Fuel Cost</string>
     <string name="title_travel_time">Travel Time</string>
+    <string name="format_distance_kilometers">%.2f km</string>
+    <string name="format_distance_meters">%.2f m</string>
+    <string name="format_fuel_cost">%.2f PHP</string>
 
 </resources>

@@ -21,6 +21,7 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
+import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 
 import kotlinx.android.synthetic.main.fragment_standard.*
 
@@ -87,6 +88,29 @@ class StandardFragment : Fragment(), PermissionsListener {
             adapter.origin(it)
         })
 
+        model.route.observe(this, Observer {
+            // return if null
+            if (it == null) return@Observer
+
+            // Update distance if it.distance() does not return null
+            it.distance()?.let { distance ->
+                val km = distance / 1000
+                total_distance_text.text =
+                    if (distance >= 1000)
+                        getString(R.string.format_distance_kilometers, km)
+                    else getString(R.string.format_distance_meters, distance)
+
+                fuel_cost_text.text = getString(
+                    R.string.format_fuel_cost, km * 50)
+            }
+
+            // Update duration if it.duration() does not return null
+            it.duration()?.let { duration ->
+                travel_time_text.text = TimeFormatter.
+                    formatTimeRemaining(context, duration)
+            }
+        })
+
         // Initialize location engine with context
         context?.let { ctx ->
             engine = LocationEngineProvider
@@ -117,11 +141,10 @@ class StandardFragment : Fragment(), PermissionsListener {
                         getString(R.string.error_already_added, text()),
                         Snackbar.LENGTH_SHORT)
                         .show()
-                else adapter.add(
-                    Waypoint(
-                        text()!!, center()!!
-                    )
-                )
+                else {
+                    adapter.add(Waypoint(text()!!, center()!!))
+                    model.getBestRoute(adapter.items)
+                }
             }
     }
 
