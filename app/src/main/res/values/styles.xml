@@ -10,7 +10,9 @@
         <!-- Disable action bar here -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
 
+    <style name="BottomAppBarFix" parent="AppTheme">
         <!-- Fix for start app bar's overflow menu -->
         <item name="android:textColorSecondary">@android:color/white</item>
     </style>
