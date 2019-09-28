@@ -16,7 +16,7 @@ import timber.log.Timber
 
 class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
 
-    private val items = arrayListOf<Waypoint>()
+    internal val items = arrayListOf<Waypoint>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
             ViewHolder = ViewHolder(LayoutInflater.from(parent.context)

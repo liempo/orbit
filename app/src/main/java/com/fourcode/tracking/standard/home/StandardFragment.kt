@@ -113,7 +113,7 @@ class StandardFragment : Fragment(), PermissionsListener {
                 // Check if last item is same to new item
                 if (last.point.latitude() == center()!!.latitude() &&
                         last.point.longitude() == center()!!.longitude())
-                    Snackbar.make(bottom_app_bar,
+                    Snackbar.make(container,
                         getString(R.string.error_already_added, text()),
                         Snackbar.LENGTH_SHORT)
                         .show()
