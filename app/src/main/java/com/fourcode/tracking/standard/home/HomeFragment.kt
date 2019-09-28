@@ -76,6 +76,15 @@ class HomeFragment : Fragment(), PermissionsListener {
             }
         }
 
+        bottom_app_bar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.menu_search -> startActivityForResult(
+                        autocomplete, REQUEST_AUTOCOMPLETE)
+            }
+
+            true
+        }
+
         add_destination_button.setOnClickListener {
             startActivityForResult(autocomplete, REQUEST_AUTOCOMPLETE)
         }
