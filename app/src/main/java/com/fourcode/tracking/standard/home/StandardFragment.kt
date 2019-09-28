@@ -71,6 +71,12 @@ class StandardFragment : Fragment(), PermissionsListener {
             setItemViewCacheSize(0)
         }
 
+        bottom_app_bar.setNavigationOnClickListener {
+            StandardOptionsBottomDialogFragment().apply {
+                show(this@StandardFragment.requireFragmentManager(), tag)
+            }
+        }
+
         add_destination_button.setOnClickListener {
             startActivityForResult(autocomplete, REQUEST_AUTOCOMPLETE)
         }
@@ -79,7 +85,7 @@ class StandardFragment : Fragment(), PermissionsListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        // Intialize view model
+        // Initialize view model
         model = ViewModelProviders.of(this)
             .get(StandardViewModel::class.java)
 
@@ -100,8 +106,9 @@ class StandardFragment : Fragment(), PermissionsListener {
                         getString(R.string.format_distance_kilometers, km)
                     else getString(R.string.format_distance_meters, distance)
 
+                val fuelCost = (km / 25) * 3
                 fuel_cost_text.text = getString(
-                    R.string.format_fuel_cost, km * 50)
+                    R.string.format_fuel_cost, fuelCost)
             }
 
             // Update duration if it.duration() does not return null

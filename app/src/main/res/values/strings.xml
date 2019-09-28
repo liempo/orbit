@@ -30,4 +30,8 @@
     <string name="format_distance_meters">%.2f m</string>
     <string name="format_fuel_cost">%.2f PHP</string>
 
+    <!--  Bottom sheet strings  -->
+    <string name="action_logout">Logout</string>
+    <string name="action_settings">Settings</string>
+
 </resources>
