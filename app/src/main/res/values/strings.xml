@@ -29,6 +29,9 @@
     <string name="format_distance_kilometers">%.2f km</string>
     <string name="format_distance_meters">%.2f m</string>
     <string name="format_fuel_cost">%.2f PHP</string>
+    <string name="placeholder_distance">0.00 km</string>
+    <string name="placeholder_fuel_cost">0.00 PHP</string>
+    <string name="placeholder_travel_time">0h 0m 0s</string>
 
     <!--  Bottom sheet strings  -->
     <string name="action_logout">Logout</string>

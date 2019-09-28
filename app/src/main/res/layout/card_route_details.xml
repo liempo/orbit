@@ -39,6 +39,7 @@
                 android:layout_width="128dp"
                 android:layout_height="24dp"
                 android:gravity="center"
+                android:text="@string/placeholder_distance"
                 tools:text="420.69km" />
         </LinearLayout>
 
@@ -64,6 +65,7 @@
                 android:layout_width="128dp"
                 android:layout_height="24dp"
                 android:gravity="center"
+                android:text="@string/placeholder_fuel_cost"
                 tools:text="567.21 PHP" />
 
         </LinearLayout>
@@ -90,6 +92,7 @@
                 android:layout_width="@dimen/route_details_text_view_width"
                 android:layout_height="@dimen/route_details_text_view_height"
                 android:gravity="center"
+                android:text="@string/placeholder_travel_time"
                 tools:text="1h 6m, 3:07 AM" />
 
         </LinearLayout>
