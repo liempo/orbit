@@ -1,24 +1,25 @@
 package com.fourcode.tracking.auth
 
-import android.view.*
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.core.content.edit
 import android.content.Context.MODE_PRIVATE
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.content.edit
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-
-import com.google.android.material.snackbar.Snackbar
-
-import okhttp3.*
-import com.beust.klaxon.*
-import timber.log.Timber
-
-import kotlinx.coroutines.*
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.auth_fragment.*
-
+import com.beust.klaxon.Json
+import com.beust.klaxon.Klaxon
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.auth_fragment.*
+import kotlinx.coroutines.*
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import timber.log.Timber
+import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
 

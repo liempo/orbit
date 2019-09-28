@@ -4,17 +4,17 @@ package com.fourcode.tracking.standard.home
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
-
-import com.fourcode.tracking.R
 import com.fourcode.tracking.BuildConfig
+import com.fourcode.tracking.R
 import com.fourcode.tracking.standard.home.WaypointsAdapter.Waypoint
-
+import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.permissions.PermissionsListener
@@ -22,9 +22,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
-
 import kotlinx.android.synthetic.main.fragment_standard.*
-
 import timber.log.Timber
 
 class StandardFragment : Fragment(), PermissionsListener {

@@ -3,26 +3,21 @@ package com.fourcode.tracking.standard.home
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-
+import com.fourcode.tracking.BuildConfig
+import com.fourcode.tracking.standard.home.WaypointsAdapter.Waypoint
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.MapboxDirections
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.GeocodingCriteria
 import com.mapbox.api.geocoding.v5.MapboxGeocoding
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 import timber.log.Timber
-import java.lang.Exception
-
-import com.fourcode.tracking.BuildConfig
-import com.fourcode.tracking.standard.home.WaypointsAdapter.Waypoint
-import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.MapboxDirections
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 
 class StandardViewModel: ViewModel(),
     LocationEngineCallback<LocationEngineResult> {

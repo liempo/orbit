@@ -1,7 +1,7 @@
 package com.fourcode.tracking
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.mapboxsdk.Mapbox
 import timber.log.Timber
 
