@@ -38,5 +38,7 @@
     <string name="title_fuel_efficiency">Efficiency (km/L)</string>
     <string name="title_fuel_price">Price of fuel per liter</string>
     <string name="title_currency">Currency</string>
+    <string name="title_navigation">Navigation</string>
+    <string name="title_simulate">Simulate</string>
 
 </resources>

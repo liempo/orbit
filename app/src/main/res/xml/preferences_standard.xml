@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        app:title="Fuel Cost Computation">
+        app:title="@string/title_fuel_cost">
 
         <EditTextPreference
             app:key="pref_fuel_efficiency"
@@ -22,6 +22,17 @@
             app:title="@string/title_currency"
             app:defaultValue="50"
             app:useSimpleSummaryProvider="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/title_navigation">
+
+        <SwitchPreferenceCompat
+            app:key="pref_should_simulate"
+            app:title="@string/title_simulate"
+            app:summary="Simulate route (for debugging purposes only)."
+            app:defaultValue="false"/>
 
     </PreferenceCategory>
 
