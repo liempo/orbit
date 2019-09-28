@@ -221,14 +221,14 @@ class AuthFragment : Fragment(), CoroutineScope {
     }
 
     private data class StandardLoginResponse(
-        override val token: String,
+        override val token: String = "",
         @Json(name = "admin_id") val adminId: String = "",
         @Json(name = "user_id") override val id: String = "",
         override val error: String = ""
     ) : LoginResponse
 
     private data class AdminLoginResponse(
-        override val token: String,
+        override val token: String = "",
         @Json(name = "id") override val id: String = "",
         override val error: String = ""
     ) : LoginResponse
