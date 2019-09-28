@@ -31,8 +31,7 @@ class OptionsBottomDialogFragment: BottomSheetDialogFragment() {
                     .navigate(R.id.action_logout)
             }
 
-            if (view is BottomSheetDialogFragment)
-                view.dismiss()
+            dismiss()
 
             true
         }
