@@ -44,4 +44,15 @@
     <string name="title_navigation">Navigation</string>
     <string name="title_simulate">Simulate</string>
 
+    <!--  Nav fragment strings  -->
+    <string name="format_location_centrifuge">
+        {\"latitude\": %f, \"longitude\": %f, \"speed\": %f}
+    </string>
+    <string name="format_notification_centrifuge">
+        {\"notification\": \"%s\"}
+    </string>
+    <string name="msg_notification_off_route">
+        User is off-route. Re-routing.
+    </string>
+
 </resources>

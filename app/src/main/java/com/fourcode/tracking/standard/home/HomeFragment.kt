@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fourcode.tracking.BuildConfig
@@ -102,6 +103,12 @@ class HomeFragment : Fragment(), PermissionsListener {
         add_destination_button.setOnClickListener {
             startActivityForResult(autocomplete, REQUEST_AUTOCOMPLETE)
         }
+
+        navigate_fab.setOnClickListener {
+            val action = HomeFragmentDirections
+                .startNavigation(model.route.value!!.toJson())
+            findNavController().navigate(action)
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -119,13 +126,15 @@ class HomeFragment : Fragment(), PermissionsListener {
                 add_destination_button.isEnabled = true
                 bottom_app_bar.menu.findItem(
                     R.id.menu_search).isVisible = true
-                navigate_fab.show()
             }
         })
 
         model.route.observe(this, Observer {
             // return if null
             if (it == null) return@Observer
+
+            // Show fab
+            navigate_fab.show()
 
             // Update distance if it.distance() does not return null
             it.distance()?.let { distance ->
