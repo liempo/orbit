@@ -17,10 +17,11 @@
             app:defaultValue="50"
             app:useSimpleSummaryProvider="true"/>
 
+        <!-- Convert to list -->
         <EditTextPreference
             app:key="pref_currency"
             app:title="@string/title_currency"
-            app:defaultValue="50"
+            app:defaultValue="PHP"
             app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>

@@ -3,6 +3,7 @@ package com.fourcode.tracking.standard.home
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
@@ -36,6 +38,9 @@ class HomeFragment : Fragment(), PermissionsListener {
 
     // Adapter object for recycler view
     private lateinit var adapter: WaypointsAdapter
+
+    // Shared preferences object to access saved settings
+    private lateinit var preferences: SharedPreferences
 
     // Intent for autocomplete (search)
     private val autocomplete: Intent
@@ -69,6 +74,9 @@ class HomeFragment : Fragment(), PermissionsListener {
             adapter = this@HomeFragment.adapter
             setItemViewCacheSize(0)
         }
+
+        preferences = PreferenceManager
+            .getDefaultSharedPreferences(context)
 
         bottom_app_bar.setNavigationOnClickListener {
             OptionsBottomDialogFragment().apply {
@@ -114,9 +122,12 @@ class HomeFragment : Fragment(), PermissionsListener {
                         getString(R.string.format_distance_kilometers, km)
                     else getString(R.string.format_distance_meters, distance)
 
-                val fuelCost = (km / 25) * 3
+                val fuelCost =
+                    (km / preferences.getFloat("pref_fuel_efficiency", 25f)) *
+                        preferences.getFloat("pref_fuel_price", 50f)
                 fuel_cost_text.text = getString(
-                    R.string.format_fuel_cost, fuelCost)
+                    R.string.format_fuel_cost, fuelCost,
+                    preferences.getString("key_currency", "PHP"))
             }
 
             // Update duration if it.duration() does not return null
