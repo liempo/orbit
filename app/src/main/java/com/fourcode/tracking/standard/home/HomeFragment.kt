@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fourcode.tracking.BuildConfig
@@ -24,6 +23,8 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 import kotlinx.android.synthetic.main.card_route_details.*
 import kotlinx.android.synthetic.main.fragment_standard.*
@@ -56,6 +57,18 @@ class HomeFragment : Fragment(), PermissionsListener {
                 .build(activity)
         }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initalize adapter class here so when fragment is
+        // reinitialized from the backstack, it won't recreate
+        this@HomeFragment.adapter = WaypointsAdapter()
+
+        // Initialize shared preferences
+        preferences = PreferenceManager
+            .getDefaultSharedPreferences(context)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -70,20 +83,18 @@ class HomeFragment : Fragment(), PermissionsListener {
         // Initialize recycler view
         with (waypoints_recycler_view) {
             layoutManager = LinearLayoutManager(context)
-            this@HomeFragment.adapter = WaypointsAdapter()
             adapter = this@HomeFragment.adapter
             setItemViewCacheSize(0)
         }
-
-        // Initialize shared preferences
-        preferences = PreferenceManager
-            .getDefaultSharedPreferences(context)
 
         // Hide and disable views until location is found
         add_destination_button.isEnabled = false
         bottom_app_bar.menu.findItem(
             R.id.menu_search).isVisible = false
         navigate_fab.hide()
+
+        // Turn on progress bar until location is found
+        progress_bar.visibility = View.VISIBLE
 
         bottom_app_bar.setNavigationOnClickListener {
             OptionsBottomDialogFragment().apply {
@@ -95,6 +106,7 @@ class HomeFragment : Fragment(), PermissionsListener {
             when (it.itemId) {
                 R.id.menu_search -> startActivityForResult(
                         autocomplete, REQUEST_AUTOCOMPLETE)
+                R.id.menu_clear_all -> { adapter.clear(); model.route.value = null }
             }
 
             true
@@ -105,9 +117,11 @@ class HomeFragment : Fragment(), PermissionsListener {
         }
 
         navigate_fab.setOnClickListener {
-            val action = HomeFragmentDirections
-                .startNavigation(model.route.value!!.toJson())
-            findNavController().navigate(action)
+            val options = NavigationLauncherOptions.builder()
+                .directionsRoute(model.route.value)
+                .build()
+            NavigationLauncher.startNavigation(
+                requireActivity(), options)
         }
     }
 
@@ -121,17 +135,36 @@ class HomeFragment : Fragment(), PermissionsListener {
         model.origin.observe(this, Observer {
             adapter.origin(it)
 
-            if (add_destination_button.isEnabled.not() || bottom_app_bar.menu.
-                    findItem(R.id.menu_search).isVisible) {
+            if (add_destination_button.isEnabled.not() ||
+                //Turn on buttons
+                bottom_app_bar.menu.findItem(
+                    R.id.menu_search).isVisible) {
                 add_destination_button.isEnabled = true
                 bottom_app_bar.menu.findItem(
                     R.id.menu_search).isVisible = true
+
+                // Turn off progress bar
+                progress_bar.visibility = View.INVISIBLE
             }
         })
 
         model.route.observe(this, Observer {
             // return if null
-            if (it == null) return@Observer
+            if (it == null) {
+
+                // Reset route details
+                total_distance_text.text = getString(
+                    R.string.placeholder_distance)
+                travel_time_text.text = getString(
+                    R.string.placeholder_travel_time)
+                fuel_cost_text.text = getString(
+                    R.string.placeholder_fuel_cost)
+
+                // Disable fab since route is empty
+                navigate_fab.hide()
+
+                return@Observer
+            }
 
             // Show fab
             navigate_fab.show()
@@ -161,6 +194,9 @@ class HomeFragment : Fragment(), PermissionsListener {
                 travel_time_text.text = TimeFormatter.
                     formatTimeRemaining(context, duration)
             }
+
+            // Turn off progress bar
+            progress_bar.visibility = View.INVISIBLE
         })
 
         // Initialize location engine with context
@@ -183,6 +219,7 @@ class HomeFragment : Fragment(), PermissionsListener {
 
         if (requestCode == REQUEST_AUTOCOMPLETE && resultCode == RESULT_OK)
             with (PlaceAutocomplete.getPlace(data)) {
+
                 // Get last item in recycler view
                 val last = adapter.last()
 
@@ -194,7 +231,13 @@ class HomeFragment : Fragment(), PermissionsListener {
                         Snackbar.LENGTH_SHORT)
                         .show()
                 else {
+                    // Turn on progress bar
+                    progress_bar.visibility = View.VISIBLE
+
+                    // Add to adapter
                     adapter.add(Waypoint(text()!!, center()!!))
+
+                    // Fetch best route from the items in adapter
                     model.getBestRoute(adapter.items)
                 }
             }

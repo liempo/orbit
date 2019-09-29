@@ -29,10 +29,7 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
         // Get item
         val item = items[position]
 
-        // Log all items' positions
-        items.forEach {
-            Timber.d("${it.name}, ${it.position}")
-        }
+        Timber.d("${item.name}, ${item.position}")
 
         // Set name to item name
         holder.name.text = item.name
@@ -41,8 +38,11 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
             // TODO Add to room
         }
 
+        // These things are will only be invisible if declared here
+        // rather than declaring it in the layout, which works but is very buggy.
         holder.start.visibility = View.INVISIBLE
         holder.end.visibility = View.INVISIBLE
+        holder.location.visibility = View.INVISIBLE
 
         when (item.position) {
             Waypoint.Position.START -> {
@@ -60,6 +60,17 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
                 holder.end.visibility = View.VISIBLE
             }
         }
+    }
+
+    internal fun clear() {
+        val origin =
+            if (items.size > 0)
+                items[0]
+            else null
+        items.clear()
+        if (origin != null)
+            items.add(origin)
+        notifyDataSetChanged()
     }
 
     internal fun origin(destination: Waypoint) {

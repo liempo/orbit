@@ -22,7 +22,6 @@
         android:layout_width="4dp"
         android:layout_height="0dp"
         android:src="@drawable/shape_line_bullet"
-        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/vertical"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,7 +32,6 @@
         android:layout_width="4dp"
         android:layout_height="0dp"
         android:src="@drawable/shape_line_bullet"
-        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@id/horizontal"
         app:layout_constraintEnd_toStartOf="@+id/vertical"
         app:layout_constraintStart_toStartOf="parent"
@@ -78,7 +76,6 @@
                 android:layout_height="match_parent"
                 android:padding="8dp"
                 android:src="@drawable/ic_my_location_primary_dark_24dp"
-                android:visibility="invisible"
                 app:layout_constraintStart_toStartOf="@+id/buttons_guideline" />
 
             <ImageButton
