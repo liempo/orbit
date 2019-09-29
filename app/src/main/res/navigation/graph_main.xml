@@ -51,9 +51,6 @@
         <action
             android:id="@+id/openSettings"
             app:destination="@id/settingsFragment" />
-        <action
-            android:id="@+id/startNavigation"
-            app:destination="@id/navigationFragment" />
 
     </fragment>
 
@@ -63,14 +60,5 @@
         android:id="@+id/settingsFragment"
         android:name="com.fourcode.tracking.standard.settings.SettingsFragment"
         android:label="SettingsFragment" />
-    <fragment
-        android:id="@+id/navigationFragment"
-        android:name="com.fourcode.tracking.standard.navigation.NavigationFragment"
-        android:label="fragment_navigation"
-        tools:layout="@layout/fragment_navigation" >
-        <argument
-            android:name="routeJson"
-            app:argType="string" />
-    </fragment>
 
 </navigation>
