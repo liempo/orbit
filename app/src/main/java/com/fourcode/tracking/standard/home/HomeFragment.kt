@@ -26,7 +26,6 @@ import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 import kotlinx.android.synthetic.main.card_route_details.*
 import kotlinx.android.synthetic.main.fragment_standard.*
-import timber.log.Timber
 
 class HomeFragment : Fragment(), PermissionsListener {
 
@@ -75,8 +74,15 @@ class HomeFragment : Fragment(), PermissionsListener {
             setItemViewCacheSize(0)
         }
 
+        // Initialize shared preferences
         preferences = PreferenceManager
             .getDefaultSharedPreferences(context)
+
+        // Hide and disable views until location is found
+        add_destination_button.isEnabled = false
+        bottom_app_bar.menu.findItem(
+            R.id.menu_search).isVisible = false
+        navigate_fab.hide()
 
         bottom_app_bar.setNavigationOnClickListener {
             OptionsBottomDialogFragment().apply {
@@ -106,8 +112,15 @@ class HomeFragment : Fragment(), PermissionsListener {
             .get(StandardViewModel::class.java)
 
         model.origin.observe(this, Observer {
-            Timber.d("Origin: ${it.name}, (${it.point})")
             adapter.origin(it)
+
+            if (add_destination_button.isEnabled.not() || bottom_app_bar.menu.
+                    findItem(R.id.menu_search).isVisible) {
+                add_destination_button.isEnabled = true
+                bottom_app_bar.menu.findItem(
+                    R.id.menu_search).isVisible = true
+                navigate_fab.show()
+            }
         })
 
         model.route.observe(this, Observer {
@@ -122,12 +135,16 @@ class HomeFragment : Fragment(), PermissionsListener {
                         getString(R.string.format_distance_kilometers, km)
                     else getString(R.string.format_distance_meters, distance)
 
-                val fuelCost =
-                    (km / preferences.getFloat("pref_fuel_efficiency", 25f)) *
-                        preferences.getFloat("pref_fuel_price", 50f)
+
+                val fuelEfficiency = preferences.getString(
+                    "pref_fuel_efficiency", "25")?.toFloat() ?: 25F
+                val fuelPrice = preferences.getString(
+                    "pref_fuel_price", "50")?.toFloat() ?: 50F
+
+                val fuelCost = (km / fuelEfficiency) * fuelPrice
                 fuel_cost_text.text = getString(
                     R.string.format_fuel_cost, fuelCost,
-                    preferences.getString("key_currency", "PHP"))
+                    preferences.getString("pref_currency", "PHP"))
             }
 
             // Update duration if it.duration() does not return null
