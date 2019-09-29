@@ -18,7 +18,7 @@
     <fragment
         android:id="@+id/authFragment"
         android:name="com.fourcode.tracking.auth.AuthFragment"
-        android:label="auth_fragment"
+        android:label="fragment_auth"
         tools:layout="@layout/auth_fragment">
 
         <action
@@ -50,15 +50,32 @@
 
         <action
             android:id="@+id/openSettings"
-            app:destination="@id/settingsFragment" />
+            app:destination="@id/standardSettingsFragment" />
+        <action
+            android:id="@+id/startNavigation"
+            app:destination="@+id/navigationActivity"
+            app:enterAnim="@anim/slide_down_top"
+            app:exitAnim="@anim/slide_up_top" />
 
     </fragment>
 
     <fragment android:id="@+id/placeholder" />
 
     <fragment
-        android:id="@+id/settingsFragment"
+        android:id="@+id/standardSettingsFragment"
         android:name="com.fourcode.tracking.standard.settings.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="fragment_standard_settings" />
+
+    <activity
+        android:id="@+id/navigationActivity"
+        android:name="com.fourcode.tracking.standard.navigation.NavigationActivity"
+        android:label="activity_navigation"
+        tools:layout="@layout/activity_navigation" >
+
+        <argument
+            android:name="routeJson"
+            app:argType="string" />
+
+    </activity>
 
 </navigation>

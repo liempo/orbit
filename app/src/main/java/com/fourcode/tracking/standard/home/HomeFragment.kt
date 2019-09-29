@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.fourcode.tracking.BuildConfig
@@ -23,8 +24,6 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 import kotlinx.android.synthetic.main.card_route_details.*
 import kotlinx.android.synthetic.main.fragment_standard.*
@@ -117,11 +116,11 @@ class HomeFragment : Fragment(), PermissionsListener {
         }
 
         navigate_fab.setOnClickListener {
-            val options = NavigationLauncherOptions.builder()
-                .directionsRoute(model.route.value)
-                .build()
-            NavigationLauncher.startNavigation(
-                requireActivity(), options)
+            model.route.value?.let {
+                val action = HomeFragmentDirections
+                    .startNavigation(it.toJson())
+                findNavController().navigate(action)
+            }
         }
     }
 

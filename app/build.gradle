@@ -22,7 +22,7 @@ android {
             // Include API keys (from global properties)
             buildConfigField 'String', "AuthApiUrl", TRACKING_AUTH_API_BASE_URL
             buildConfigField 'String', "CentrifugeUrl", TRACKING_CENTRIFUGE_URL
-            buildConfigField 'String','MapboxApiKey', MAPBOX_API_KEY
+            buildConfigField 'String', 'MapboxApiKey', MAPBOX_API_KEY
         }
 
         release {
@@ -44,7 +44,7 @@ android {
             // Include API keys (from global properties)
             buildConfigField 'String', "AuthApiUrl", TRACKING_AUTH_API_BASE_URL
             buildConfigField 'String', "CentrifugeUrl", TRACKING_CENTRIFUGE_URL
-            buildConfigField 'String','MapboxApiKey', MAPBOX_API_KEY
+            buildConfigField 'String', 'MapboxApiKey', MAPBOX_API_KEY
         }
     }
     compileOptions {
