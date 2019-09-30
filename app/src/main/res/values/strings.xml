@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Tracking</string>
+    <string name="app_name">Orbit</string>
 
     <!--  Auth fragment strings  -->
     <string name="hint_username_or_email">Username or Email</string>
