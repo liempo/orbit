@@ -30,7 +30,13 @@ class NavigationActivity : AppCompatActivity(),
 
     // Centrifuge client to broadcast device's location
     private val client: Client by lazy {
-        Client(BuildConfig.CentrifugeUrl, Options(), CentrifugeListener())
+        Client(BuildConfig.CentrifugeUrl, Options(), object : EventListener() {
+
+            override fun onConnect(client: Client?, event: ConnectEvent?) {
+                Timber.i("Centrifuge connected")
+            }
+
+        })
     }
 
     // Authentication token (retrieved in auth frag)
@@ -42,14 +48,25 @@ class NavigationActivity : AppCompatActivity(),
         setContentView(R.layout.activity_navigation)
 
         // Get token and adminId
-        with (getSharedPreferences(getString(
-            R.string.shared_pref_credentials),
-            Context.MODE_PRIVATE)) {
+        with(
+            getSharedPreferences(
+                getString(
+                    R.string.shared_pref_credentials
+                ),
+                Context.MODE_PRIVATE
+            )
+        ) {
 
-            token = getString(getString(
-                R.string.shared_pref_token), null)
-            adminId = getString(getString(
-                R.string.shared_pref_admin_id), null)
+            token = getString(
+                getString(
+                    R.string.shared_pref_token
+                ), null
+            )
+            adminId = getString(
+                getString(
+                    R.string.shared_pref_admin_id
+                ), null
+            )
         }
 
         // Connect to centrifugal socket
@@ -94,23 +111,31 @@ class NavigationActivity : AppCompatActivity(),
     override fun onNavigationRunning() {
         nav_view.retrieveMapboxNavigation()?.let {
             it.addOffRouteListener {
-                val notif = getString(R.string.format_notification_centrifuge,
-                    getString(R.string.msg_notification_off_route))
-                client.publish("notification:$adminId",
-                    notif.toByteArray(), this)
+                val notif = getString(
+                    R.string.format_notification_centrifuge,
+                    getString(R.string.msg_notification_off_route)
+                )
+                client.publish(
+                    "notification:$adminId",
+                    notif.toByteArray(), this
+                )
             }
         }
     }
 
     override fun onProgressChange(
         location: Location?,
-        routeProgress: RouteProgress?) {
+        routeProgress: RouteProgress?
+    ) {
         location?.let {
-            val dataToSend = getString(R.string.
-                format_location_centrifuge,
-                it.latitude, it.longitude, it.speed)
-            client.publish("location:$adminId",
-                dataToSend.toByteArray(), this)
+            val dataToSend = getString(
+                R.string.format_location_centrifuge,
+                it.latitude, it.longitude, it.speed
+            )
+            client.publish(
+                "location:$adminId",
+                dataToSend.toByteArray(), this
+            )
         }
     }
 
@@ -120,9 +145,13 @@ class NavigationActivity : AppCompatActivity(),
         milestone: Milestone?
     ) {
         if (instruction.isNullOrEmpty().not())
-            client.publish("notification:$adminId",
-                getString(R.string.format_notification_centrifuge,
-                    instruction).toByteArray(), this)
+            client.publish(
+                "notification:$adminId",
+                getString(
+                    R.string.format_notification_centrifuge,
+                    instruction
+                ).toByteArray(), this
+            )
     }
 
     override fun onDone(error: ReplyError?, result: PublishResult?) {
@@ -130,7 +159,9 @@ class NavigationActivity : AppCompatActivity(),
         else Timber.d("Published new data to centrifugal server")
     }
 
-    override fun onFailure(e: Throwable?) { Timber.e(e) }
+    override fun onFailure(e: Throwable?) {
+        Timber.e(e)
+    }
 
     override fun onStart() {
         super.onStart()

@@ -46,8 +46,10 @@ class HomeFragment : Fragment(), PermissionsListener {
     private val autocomplete: Intent
         get() {
             val options = PlaceOptions.builder()
-                .backgroundColor(requireActivity()
-                    .getColor(android.R.color.white))
+                .backgroundColor(
+                    requireActivity()
+                        .getColor(android.R.color.white)
+                )
             if (model.origin.value != null)
                 options.proximity(model.origin.value!!.point)
             return PlaceAutocomplete.IntentBuilder()
@@ -80,7 +82,7 @@ class HomeFragment : Fragment(), PermissionsListener {
         super.onViewCreated(view, savedInstanceState)
 
         // Initialize recycler view
-        with (waypoints_recycler_view) {
+        with(waypoints_recycler_view) {
             layoutManager = LinearLayoutManager(context)
             adapter = this@HomeFragment.adapter
             setItemViewCacheSize(0)
@@ -89,7 +91,8 @@ class HomeFragment : Fragment(), PermissionsListener {
         // Hide and disable views until location is found
         add_destination_button.isEnabled = false
         bottom_app_bar.menu.findItem(
-            R.id.menu_search).isVisible = false
+            R.id.menu_search
+        ).isVisible = false
         navigate_fab.hide()
 
         // Turn on progress bar until location is found
@@ -104,8 +107,11 @@ class HomeFragment : Fragment(), PermissionsListener {
         bottom_app_bar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.menu_search -> startActivityForResult(
-                        autocomplete, REQUEST_AUTOCOMPLETE)
-                R.id.menu_clear_all -> { adapter.clear(); model.route.value = null }
+                    autocomplete, REQUEST_AUTOCOMPLETE
+                )
+                R.id.menu_clear_all -> {
+                    adapter.clear(); model.route.value = null
+                }
             }
 
             true
@@ -137,10 +143,13 @@ class HomeFragment : Fragment(), PermissionsListener {
             if (add_destination_button.isEnabled.not() ||
                 //Turn on buttons
                 bottom_app_bar.menu.findItem(
-                    R.id.menu_search).isVisible) {
+                    R.id.menu_search
+                ).isVisible
+            ) {
                 add_destination_button.isEnabled = true
                 bottom_app_bar.menu.findItem(
-                    R.id.menu_search).isVisible = true
+                    R.id.menu_search
+                ).isVisible = true
 
                 // Turn off progress bar
                 progress_bar.visibility = View.INVISIBLE
@@ -153,11 +162,14 @@ class HomeFragment : Fragment(), PermissionsListener {
 
                 // Reset route details
                 total_distance_text.text = getString(
-                    R.string.placeholder_distance)
+                    R.string.placeholder_distance
+                )
                 travel_time_text.text = getString(
-                    R.string.placeholder_travel_time)
+                    R.string.placeholder_travel_time
+                )
                 fuel_cost_text.text = getString(
-                    R.string.placeholder_fuel_cost)
+                    R.string.placeholder_fuel_cost
+                )
 
                 // Disable fab since route is empty
                 navigate_fab.hide()
@@ -178,20 +190,22 @@ class HomeFragment : Fragment(), PermissionsListener {
 
 
                 val fuelEfficiency = preferences.getString(
-                    "pref_fuel_efficiency", "25")?.toFloat() ?: 25F
+                    "pref_fuel_efficiency", "25"
+                )?.toFloat() ?: 25F
                 val fuelPrice = preferences.getString(
-                    "pref_fuel_price", "50")?.toFloat() ?: 50F
+                    "pref_fuel_price", "50"
+                )?.toFloat() ?: 50F
 
                 val fuelCost = (km / fuelEfficiency) * fuelPrice
                 fuel_cost_text.text = getString(
                     R.string.format_fuel_cost, fuelCost,
-                    preferences.getString("pref_currency", "PHP"))
+                    preferences.getString("pref_currency", "PHP")
+                )
             }
 
             // Update duration if it.duration() does not return null
             it.duration()?.let { duration ->
-                travel_time_text.text = TimeFormatter.
-                    formatTimeRemaining(context, duration)
+                travel_time_text.text = TimeFormatter.formatTimeRemaining(context, duration)
             }
 
             // Turn off progress bar
@@ -205,11 +219,12 @@ class HomeFragment : Fragment(), PermissionsListener {
 
             // Quick permission check
             if (PermissionsManager.areLocationPermissionsGranted(ctx))
-                // Get initial location
+            // Get initial location
                 engine.getLastLocation(model)
-                // else ask for permissions
+            // else ask for permissions
             else PermissionsManager(this).apply {
-                requestLocationPermissions(requireActivity()) }
+                requestLocationPermissions(requireActivity())
+            }
         }
     }
 
@@ -217,17 +232,20 @@ class HomeFragment : Fragment(), PermissionsListener {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_AUTOCOMPLETE && resultCode == RESULT_OK)
-            with (PlaceAutocomplete.getPlace(data)) {
+            with(PlaceAutocomplete.getPlace(data)) {
 
                 // Get last item in recycler view
                 val last = adapter.last()
 
                 // Check if last item is same to new item
                 if (last.point.latitude() == center()!!.latitude() &&
-                        last.point.longitude() == center()!!.longitude())
-                    Snackbar.make(container,
+                    last.point.longitude() == center()!!.longitude()
+                )
+                    Snackbar.make(
+                        container,
                         getString(R.string.error_already_added, text()),
-                        Snackbar.LENGTH_SHORT)
+                        Snackbar.LENGTH_SHORT
+                    )
                         .show()
                 else {
                     // Turn on progress bar
@@ -249,7 +267,8 @@ class HomeFragment : Fragment(), PermissionsListener {
 
     override fun onExplanationNeeded(
         permissionsToExplain: MutableList<String>?
-    ) {}
+    ) {
+    }
 
     companion object {
         private const val REQUEST_AUTOCOMPLETE = 5421

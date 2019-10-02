@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class StandardViewModel: ViewModel(),
+class StandardViewModel : ViewModel(),
     LocationEngineCallback<LocationEngineResult> {
 
     internal val origin: MutableLiveData<Waypoint> = MutableLiveData()
@@ -62,7 +62,7 @@ class StandardViewModel: ViewModel(),
                 val routes = builder.build().executeCall().body()?.routes()
 
                 // return best route, if route is empty return null
-                 return@withContext  if (routes.isNullOrEmpty().not()) routes!![0] else null
+                return@withContext if (routes.isNullOrEmpty().not()) routes!![0] else null
             }
         }
     }
@@ -74,7 +74,8 @@ class StandardViewModel: ViewModel(),
 
             // Create a point obj
             val point = Point.fromLngLat(
-                location.longitude, location.latitude)
+                location.longitude, location.latitude
+            )
 
             // Run suspend function
             val response = runReverseGeocode(point)

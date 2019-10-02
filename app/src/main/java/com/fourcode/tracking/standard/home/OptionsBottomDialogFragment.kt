@@ -9,7 +9,7 @@ import com.fourcode.tracking.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.sheet_standard_options.*
 
-class OptionsBottomDialogFragment: BottomSheetDialogFragment() {
+class OptionsBottomDialogFragment : BottomSheetDialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -14,14 +14,18 @@ import com.mapbox.geojson.Point
 import kotlinx.android.synthetic.main.item_waypoint.view.*
 import timber.log.Timber
 
-class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
+class WaypointsAdapter : RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
 
     internal val items = arrayListOf<Waypoint>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
-            ViewHolder = ViewHolder(LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_waypoint,
-                    parent, false))
+            ViewHolder = ViewHolder(
+        LayoutInflater.from(parent.context)
+            .inflate(
+                R.layout.item_waypoint,
+                parent, false
+            )
+    )
 
     override fun getItemCount(): Int = items.size
 
@@ -100,7 +104,7 @@ class WaypointsAdapter: RecyclerView.Adapter<WaypointsAdapter.ViewHolder>() {
 
     internal fun last() = items.last()
 
-    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         // For aesthetic feel
         val start: ImageView = view.left_line_icon_bottom
