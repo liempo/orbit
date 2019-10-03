@@ -39,6 +39,10 @@
             android:name="toLogout"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="asAdmin"
+            app:argType="boolean"
+            android:defaultValue="false" />
 
     </fragment>
 
