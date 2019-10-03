@@ -21,7 +21,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
-import kotlin.random.Random
 
 
 class AuthFragment : Fragment(), CoroutineScope {
@@ -41,14 +40,6 @@ class AuthFragment : Fragment(), CoroutineScope {
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Randomize splash screen
-        video_layout.setPathOrUrl(
-            getString(
-                R.string.url_splash_video_format,
-                Random.nextInt(1, 5)
-            )
-        )
-
         // Initialize shared preferences object, for credentials
         val sharedPreferences =
             requireActivity().getSharedPreferences(
