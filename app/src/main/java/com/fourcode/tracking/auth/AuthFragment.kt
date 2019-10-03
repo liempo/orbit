@@ -103,6 +103,8 @@ class AuthFragment : Fragment(), CoroutineScope {
                     if (isAdmin) startAdminLogin(username, password)
                     else startStandardLogin(username, password)
 
+                Timber.e("isAdmin = $isAdmin")
+
                 if (response.id.isNotEmpty()) {
                     Timber.d("Logged in with id: ${response.id}")
 
@@ -146,11 +148,18 @@ class AuthFragment : Fragment(), CoroutineScope {
                 username_or_email_input.isEnabled = true
                 password_input.isEnabled = true
                 login_button.isEnabled = true
-            } else Snackbar.make(
-                view,
-                R.string.error_missing_fields,
-                Snackbar.LENGTH_SHORT
-            ).show()
+
+                // Log error
+                Timber.w("Orbit API Error Message: ${response.error}")
+            } else {
+                Snackbar.make(
+                    view,
+                    R.string.error_missing_fields,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+
+                Timber.w("Missing fields (username or password)")
+            }
         }
 
     }
