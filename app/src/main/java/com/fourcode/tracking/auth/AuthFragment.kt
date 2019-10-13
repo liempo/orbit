@@ -9,19 +9,18 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.beust.klaxon.Json
-import com.beust.klaxon.Klaxon
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.auth_fragment.*
 import kotlinx.coroutines.*
-import okhttp3.FormBody
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
-
 
 class AuthFragment : Fragment(), CoroutineScope {
 
@@ -48,27 +47,17 @@ class AuthFragment : Fragment(), CoroutineScope {
 
         // Logout if toLogout is true
         if (args.toLogout) sharedPreferences.edit {
-            remove(getString(R.string.shared_pref_id))
             remove(getString(R.string.shared_pref_token))
-            remove(getString(R.string.shared_pref_admin_id))
         }
 
         // Check if logged in first
-        val loggedInId = sharedPreferences.getString(
-            getString(R.string.shared_pref_id), null
-        )
+        val isLoggedIn = sharedPreferences.getString(
+            getString(R.string.shared_pref_token), null
+        ) != null
 
-        // Check user type (standard or admin)
-        val isLoggedInUserAdmin = (sharedPreferences.getString(
-            getString(R.string.shared_pref_admin_id), null
-        ) == null)
-
-        if (loggedInId.isNullOrBlank().not())
-            findNavController().navigate(
-                if (isLoggedInUserAdmin)
-                    AuthFragmentDirections.startAdmin()
-                else AuthFragmentDirections.startStandard()
-            )
+        // Skip login screen if isLoggedIn is true
+        if (isLoggedIn) findNavController()
+            .navigate(AuthFragmentDirections.startStandard())
 
         login_button.setOnClickListener {
             val username = username_or_email_input.text.toString()
@@ -82,8 +71,8 @@ class AuthFragment : Fragment(), CoroutineScope {
 
                 val response = startStandardLogin(username, password)
 
-                if (response.id.isNotEmpty()) {
-                    Timber.d("Logged in with id: ${response.id}")
+                if (response.status == "success") {
+                    Timber.d("Login ${response.status}")
 
                     // Save credentials locally (this means user is logged in)
                     sharedPreferences.edit {
@@ -91,31 +80,20 @@ class AuthFragment : Fragment(), CoroutineScope {
                             getString(
                                 R.string
                                     .shared_pref_token
-                            ), response.token
-                        )
-                        putString(
-                            getString(
-                                R.string
-                                    .shared_pref_id
-                            ), response.id
-                        )
-
-                        putString(
-                            getString(R.string.shared_pref_admin_id),
-                            response.adminId
+                            ), response.data.token
                         )
                     }
 
-                    findNavController().navigate(AuthFragmentDirections.startStandard())
-
+                    // Open next screen after token is saved
+                    findNavController().navigate(
+                        AuthFragmentDirections.startStandard())
                 } else
                 // Show error if error is not empty
                     Snackbar.make(
                         view,
-                        response.error,
+                        response.message,
                         Snackbar.LENGTH_SHORT
-                    )
-                        .show()
+                    ).show()
 
                 // Enable UI componente
                 username_or_email_input.isEnabled = true
@@ -123,7 +101,7 @@ class AuthFragment : Fragment(), CoroutineScope {
                 login_button.isEnabled = true
 
                 // Log error
-                Timber.w("Orbit API Error Message: ${response.error}")
+                Timber.w("Orbit API Error Message: ${response.message}")
             } else {
                 Snackbar.make(
                     view,
@@ -139,30 +117,34 @@ class AuthFragment : Fragment(), CoroutineScope {
 
     private suspend fun startStandardLogin(
         username: String, password: String
-    ): StandardLoginResponse {
+    ): LoginResponse {
         // Create an okhttp3
         val client = OkHttpClient()
 
-        // Create request body
-        val body = FormBody.Builder()
-            .add("username", username)
-            .add("password", password)
-            .build()
+        val body = """
+            { "username": "$username", "password": "$password" }
+        """.trimIndent().toRequestBody()
 
         // Create OkHttpRequest
         val request = Request.Builder()
-            .url(BuildConfig.AuthApiUrl + "login")
+            .url(BuildConfig.AuthApiUrl)
             .addHeader("Content-Type", "application/json")
-            .addHeader("Accept", "application/json")
             .post(body)
             .build()
 
         return withContext(Dispatchers.IO) {
+            // Create json object (kxs)
+            val json = Json(JsonConfiguration.Stable)
+
             // Execute request and get response
-            val response = client.newCall(request).execute().body!!
+            val response = client.newCall(request).execute()
+            val responseBody = response.body!!.string()
+
+            // Log response body
+            Timber.d("ResponseBody: $responseBody")
 
             // Parse result before closing response
-            val result = Klaxon().parse<StandardLoginResponse>(response.string())!!
+            val result = json.parse(LoginResponse.serializer(), responseBody)
 
             // Close response to avoid leaks
             response.close()
@@ -176,11 +158,16 @@ class AuthFragment : Fragment(), CoroutineScope {
         job.cancel(); super.onDestroy()
     }
 
-    private data class StandardLoginResponse(
-        @Json(name = "token") val token: String = "",
-        @Json(name = "admin_id") val adminId: String = "",
-        @Json(name = "user_id") val id: String = "",
-        val error: String = ""
+    @Serializable
+    private data class LoginResponse(
+        val status: String,
+        val message: String = "",
+        val data: LoginData
+    )
+
+    @Serializable
+    private data class LoginData(
+        val token: String
     )
 
 }

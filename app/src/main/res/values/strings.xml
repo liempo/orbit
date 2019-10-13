@@ -6,6 +6,7 @@
     <string name="hint_password">Password</string>
     <string name="action_login">Login</string>
     <string name="msg_logging_in_as_admin">Logging in as an admin</string>
+    <string name="error_login">Error in logging in.</string>
     <string name="error_missing_fields">Some fields are missing.</string>
 
     <!--  Shared preferences strings  -->

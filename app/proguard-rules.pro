@@ -34,6 +34,13 @@
 # OkHttp platform used only on JVM and when Conscrypt dependency is available.
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 
-################# Proguard rules for Okio (check github page) ################
-# Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
--dontwarn org.codehaus.mojo.animal_sniffer.*
+################# Proguard rules for for kotlinx serialization ################
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.SerializationKt
+-keep,includedescriptorclasses class com.yourcompany.yourpackage.**$$serializer { *; } # <-- change package name to your app's
+-keepclassmembers class com.yourcompany.yourpackage.** { # <-- change package name to your app's
+    *** Companion;
+}
+-keepclasseswithmembers class com.yourcompany.yourpackage.** { # <-- change package name to your app's
+    kotlinx.serialization.KSerializer serializer(...);
+}
