@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.navArgs
 import androidx.preference.PreferenceManager
-import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions
@@ -16,32 +15,17 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-import io.github.centrifugal.centrifuge.*
 import kotlinx.android.synthetic.main.activity_navigation.*
-import timber.log.Timber
 
 class NavigationActivity : AppCompatActivity(),
     NavigationListener,
     ProgressChangeListener,
-    MilestoneEventListener,
-    ReplyCallback<PublishResult> {
+    MilestoneEventListener {
 
     private val args: NavigationActivityArgs by navArgs()
 
-    // Centrifuge client to broadcast device's location
-    private val client: Client by lazy {
-        Client(BuildConfig.CentrifugeUrl, Options(), object : EventListener() {
-
-            override fun onConnect(client: Client?, event: ConnectEvent?) {
-                Timber.i("Centrifuge connected")
-            }
-
-        })
-    }
-
     // Authentication token (retrieved in auth frag)
     private var token: String? = null
-    private var adminId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,16 +46,7 @@ class NavigationActivity : AppCompatActivity(),
                     R.string.shared_pref_token
                 ), null
             )
-            adminId = getString(
-                getString(
-                    R.string.shared_pref_admin_id
-                ), null
-            )
         }
-
-        // Connect to centrifugal socket
-        client.setToken(token)
-        client.connect()
 
         // Initialize navigation view
         nav_view.onCreate(savedInstanceState)
@@ -111,14 +86,7 @@ class NavigationActivity : AppCompatActivity(),
     override fun onNavigationRunning() {
         nav_view.retrieveMapboxNavigation()?.let {
             it.addOffRouteListener {
-                val notif = getString(
-                    R.string.format_notification_centrifuge,
-                    getString(R.string.msg_notification_off_route)
-                )
-                client.publish(
-                    "notification:$adminId",
-                    notif.toByteArray(), this
-                )
+                // TODO Notify socket off-route
             }
         }
     }
@@ -128,14 +96,7 @@ class NavigationActivity : AppCompatActivity(),
         routeProgress: RouteProgress?
     ) {
         location?.let {
-            val dataToSend = getString(
-                R.string.format_location_centrifuge,
-                it.latitude, it.longitude, it.speed
-            )
-            client.publish(
-                "location:$adminId",
-                dataToSend.toByteArray(), this
-            )
+            // TODO Notify socket new location
         }
     }
 
@@ -144,23 +105,7 @@ class NavigationActivity : AppCompatActivity(),
         instruction: String?,
         milestone: Milestone?
     ) {
-        if (instruction.isNullOrEmpty().not())
-            client.publish(
-                "notification:$adminId",
-                getString(
-                    R.string.format_notification_centrifuge,
-                    instruction
-                ).toByteArray(), this
-            )
-    }
-
-    override fun onDone(error: ReplyError?, result: PublishResult?) {
-        if (error != null) Timber.e(error.message)
-        else Timber.d("Published new data to centrifugal server")
-    }
-
-    override fun onFailure(e: Throwable?) {
-        Timber.e(e)
+        // TODO Notify socket milestone event
     }
 
     override fun onStart() {
