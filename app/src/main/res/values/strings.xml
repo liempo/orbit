@@ -2,7 +2,7 @@
     <string name="app_name">Orbit</string>
 
     <!--  Auth fragment strings  -->
-    <string name="hint_username_or_email">Username or Email</string>
+    <string name="hint_username">Username</string>
     <string name="hint_password">Password</string>
     <string name="action_login">Login</string>
     <string name="error_missing_fields">Some fields are missing.</string>
