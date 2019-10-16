@@ -70,7 +70,8 @@ class AuthFragment : Fragment(), CoroutineScope {
 
                     // Save credentials locally (this means user is logged in)
                     sharedPreferences.edit {
-                        putString(getString(R.string.shared_pref_token), response.data.token)
+                        // Will not crash, successful call always have data
+                        putString(getString(R.string.shared_pref_token), response.data!!.token)
                     }
 
                     // Open next screen after token is saved
@@ -103,9 +104,9 @@ class AuthFragment : Fragment(), CoroutineScope {
             if (value) View.VISIBLE else View.INVISIBLE
 
         // Enable UI components
-        username_input.isEnabled = value
-        password_input.isEnabled = value
-        login_button.isEnabled = value
+        username_input.isEnabled = value.not()
+        password_input.isEnabled = value.not()
+        login_button.isEnabled = value.not()
     }
 
     private suspend fun startStandardLogin(
@@ -155,7 +156,7 @@ class AuthFragment : Fragment(), CoroutineScope {
     private data class LoginResponse(
         val status: String,
         val message: String = "",
-        val data: LoginData
+        val data: LoginData? = null
     )
 
     @Serializable
