@@ -99,7 +99,7 @@ class HomeFragment : Fragment(), PermissionsListener {
         progress_bar.visibility = View.VISIBLE
 
         bottom_app_bar.setNavigationOnClickListener {
-            OptionsBottomDialogFragment().apply {
+            OptionsDialogFragment().apply {
                 show(this@HomeFragment.requireFragmentManager(), tag)
             }
         }
