@@ -10,51 +10,60 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp"
         app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/banner"
             android:layout_width="256dp"
             android:layout_height="256dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:padding="32dp"
+            android:layout_margin="@dimen/auth_margin"
             android:scaleType="centerCrop"
             android:src="@drawable/banner"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/progress_bar" />
 
         <EditText
-            android:id="@+id/username_or_email_input"
+            android:id="@+id/username_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autofillHints="emailAddress"
             android:background="@drawable/shape_edit_text_background"
             android:hint="@string/hint_username_or_email"
             android:inputType="textEmailAddress"
-            android:padding="@dimen/auth_edit_text_padding"
             android:textColorHint="@color/colorPrimaryAccent"
+            android:layout_margin="@dimen/auth_margin"
+            android:padding="@dimen/auth_edit_text_padding"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/banner" />
+            app:layout_constraintTop_toBottomOf="@id/banner"
+            android:autofillHints="username" />
 
         <EditText
             android:id="@+id/password_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:autofillHints="password"
             android:background="@drawable/shape_edit_text_background"
             android:hint="@string/hint_password"
             android:inputType="textPassword"
+            android:layout_margin="@dimen/auth_margin"
             android:padding="@dimen/auth_edit_text_padding"
             android:textColorHint="@color/colorPrimaryAccent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/username_or_email_input" />
+            app:layout_constraintTop_toBottomOf="@id/username_input"
+            android:autofillHints="password" />
 
         <Button
             android:id="@+id/login_button"
@@ -63,7 +72,8 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
             android:background="@drawable/shape_button_background"
-            android:padding="12dp"
+            android:layout_margin="@dimen/auth_margin"
+            android:padding="@dimen/auth_edit_text_padding"
             android:text="@string/action_login"
             android:textColor="@color/colorPrimaryText"
             app:layout_constraintEnd_toEndOf="parent"

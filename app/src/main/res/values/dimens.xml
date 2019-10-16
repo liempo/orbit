@@ -2,6 +2,9 @@
 <resources>
     <!--  Auth fragment dimens  -->
     <dimen name="auth_edit_text_padding">12dp</dimen>
+    <dimen name="auth_margin">24dp</dimen>
+
+    <!--  Route header dimens  -->
     <dimen name="route_details_layout_padding">8dp</dimen>
     <dimen name="route_details_text_view_width">128dp</dimen>
     <dimen name="route_details_text_view_height">24dp</dimen>

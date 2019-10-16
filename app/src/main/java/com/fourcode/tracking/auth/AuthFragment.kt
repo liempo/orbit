@@ -1,6 +1,5 @@
 package com.fourcode.tracking.auth
 
-import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +8,7 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.preference.PreferenceManager
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.R
 import com.google.android.material.snackbar.Snackbar
@@ -39,11 +39,9 @@ class AuthFragment : Fragment(), CoroutineScope {
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Initialize shared preferences object, for credentials
-        val sharedPreferences =
-            requireActivity().getSharedPreferences(
-                getString(R.string.shared_pref_credentials), MODE_PRIVATE
-            )
+        // Get default shared pref, for credentials
+        val sharedPreferences = PreferenceManager
+            .getDefaultSharedPreferences(context)
 
         // Logout if toLogout is true
         if (args.toLogout) sharedPreferences.edit {
@@ -60,33 +58,25 @@ class AuthFragment : Fragment(), CoroutineScope {
             .navigate(AuthFragmentDirections.startStandard())
 
         login_button.setOnClickListener {
-            val username = username_or_email_input.text.toString()
+            val username = username_input.text.toString()
             val password = password_input.text.toString()
 
             if (username.isNotBlank() && password.isNotBlank()) launch {
-                // Disable UI components while call
-                username_or_email_input.isEnabled = false
-                password_input.isEnabled = false
-                login_button.isEnabled = false
+                isLoading(true)
 
                 val response = startStandardLogin(username, password)
-
                 if (response.status == "success") {
                     Timber.d("Login ${response.status}")
 
                     // Save credentials locally (this means user is logged in)
                     sharedPreferences.edit {
-                        putString(
-                            getString(
-                                R.string
-                                    .shared_pref_token
-                            ), response.data.token
-                        )
+                        putString(getString(R.string.shared_pref_token), response.data.token)
                     }
 
                     // Open next screen after token is saved
                     findNavController().navigate(
                         AuthFragmentDirections.startStandard())
+
                 } else
                 // Show error if error is not empty
                     Snackbar.make(
@@ -94,25 +84,28 @@ class AuthFragment : Fragment(), CoroutineScope {
                         response.message,
                         Snackbar.LENGTH_SHORT
                     ).show()
-
-                // Enable UI componente
-                username_or_email_input.isEnabled = true
-                password_input.isEnabled = true
-                login_button.isEnabled = true
+                isLoading(false)
 
                 // Log error
                 Timber.w("Orbit API Error Message: ${response.message}")
-            } else {
-                Snackbar.make(
-                    view,
-                    R.string.error_missing_fields,
-                    Snackbar.LENGTH_SHORT
-                ).show()
+            } else Snackbar.make(
+                view,
+                R.string.error_missing_fields,
+                Snackbar.LENGTH_SHORT
+            ).show()
 
-                Timber.w("Missing fields (username or password)")
-            }
         }
+    }
 
+    private fun isLoading(value: Boolean) {
+        // Set up progress bar if yes
+        progress_bar.visibility =
+            if (value) View.VISIBLE else View.INVISIBLE
+
+        // Enable UI components
+        username_input.isEnabled = value
+        password_input.isEnabled = value
+        login_button.isEnabled = value
     }
 
     private suspend fun startStandardLogin(

@@ -8,7 +8,6 @@
     <string name="error_missing_fields">Some fields are missing.</string>
 
     <!--  Shared preferences strings  -->
-    <string name="shared_pref_credentials">tracking_credentials</string>
     <string name="shared_pref_token">tracking_token</string>
 
     <!--  Home (standard) fragment strings  -->
@@ -38,16 +37,5 @@
     <string name="title_currency">Currency</string>
     <string name="title_navigation">Navigation</string>
     <string name="title_simulate">Simulate</string>
-
-    <!--  Nav fragment strings  -->
-    <string name="format_location_centrifuge">
-        {\"latitude\": %f, \"longitude\": %f, \"speed\": %f}
-    </string>
-    <string name="format_notification_centrifuge">
-        {\"notification\": \"%s\"}
-    </string>
-    <string name="msg_notification_off_route">
-        User is off-route. Re-routing.
-    </string>
 
 </resources>
