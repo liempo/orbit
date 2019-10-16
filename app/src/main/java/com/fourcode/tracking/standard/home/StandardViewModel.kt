@@ -68,15 +68,21 @@ class StandardViewModel : ViewModel(),
     }
 
     override fun onSuccess(result: LocationEngineResult?) {
+        val location = result?.lastLocation
+
+        // Check if location is now available else return
+        // Let fragment handle it (ask for location again)
+        if (location == null) {
+            origin.value = null; return
+        }
+
+        // Create a point obj
+        val point = Point.fromLngLat(
+            location.longitude, location.latitude
+        )
+
         // Launch a kotlin co-routine
         viewModelScope.launch {
-            val location = result?.lastLocation ?: return@launch
-
-            // Create a point obj
-            val point = Point.fromLngLat(
-                location.longitude, location.latitude
-            )
-
             // Run suspend function
             val response = runReverseGeocode(point)
 

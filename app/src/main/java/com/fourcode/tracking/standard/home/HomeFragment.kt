@@ -1,13 +1,15 @@
 package com.fourcode.tracking.standard.home
 
 
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.app.Activity.RESULT_OK
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -20,15 +22,13 @@ import com.fourcode.tracking.standard.home.WaypointsAdapter.Waypoint
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete
 import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 import kotlinx.android.synthetic.main.card_route_details.*
 import kotlinx.android.synthetic.main.fragment_standard.*
 
-class HomeFragment : Fragment(), PermissionsListener {
+class HomeFragment : Fragment()  {
 
     // Shared View model for standard log in
     private lateinit var model: StandardViewModel
@@ -61,7 +61,7 @@ class HomeFragment : Fragment(), PermissionsListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initalize adapter class here so when fragment is
+        // Initialize adapter class here so when fragment is
         // reinitialized from the backstack, it won't recreate
         this@HomeFragment.adapter = WaypointsAdapter()
 
@@ -138,6 +138,17 @@ class HomeFragment : Fragment(), PermissionsListener {
             .get(StandardViewModel::class.java)
 
         model.origin.observe(this, Observer {
+            if (it == null) {
+                Snackbar.make(
+                    container,
+                    R.string.error_location_failed,
+                    Snackbar.LENGTH_SHORT
+                ).setAction(R.string.action_retry) {
+                    engine.getLastLocation(model)
+                }.show()
+                return@Observer
+            }
+
             adapter.origin(it)
 
             if (add_destination_button.isEnabled.not() ||
@@ -218,13 +229,12 @@ class HomeFragment : Fragment(), PermissionsListener {
                 .getBestLocationEngine(ctx)
 
             // Quick permission check
-            if (PermissionsManager.areLocationPermissionsGranted(ctx))
-            // Get initial location
+            if (context?.checkSelfPermission(
+                    ACCESS_FINE_LOCATION) == PERMISSION_GRANTED)
                 engine.getLastLocation(model)
-            // else ask for permissions
-            else PermissionsManager(this).apply {
-                requestLocationPermissions(requireActivity())
-            }
+            else requestPermissions(arrayOf(
+                ACCESS_FINE_LOCATION), REQUEST_FINE_LOCATION)
+
         }
     }
 
@@ -260,17 +270,20 @@ class HomeFragment : Fragment(), PermissionsListener {
             }
     }
 
-    override fun onPermissionResult(granted: Boolean) {
-        // Get initial location
-        engine.getLastLocation(model)
-    }
-
-    override fun onExplanationNeeded(
-        permissionsToExplain: MutableList<String>?
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_FINE_LOCATION &&
+            grantResults.all { it == PERMISSION_GRANTED })
+            engine.getLastLocation(model)
+
     }
 
     companion object {
         private const val REQUEST_AUTOCOMPLETE = 5421
+        private const val REQUEST_FINE_LOCATION = 1255
     }
 }

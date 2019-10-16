@@ -15,8 +15,10 @@
     <string name="action_add_destination">Add destination</string>
     <string name="action_clear_all">Clear All</string>
     <string name="action_show_favorites">Show Favorites</string>
+    <string name="action_retry">Retry</string>
     <string name="msg_loading">Loading</string>
     <string name="error_already_added">%s is already on the list.</string>
+    <string name="error_location_failed">There was a problem retrieving the location.</string>
     <string name="title_total_distance">Total Distance</string>
     <string name="title_fuel_cost">Fuel Cost</string>
     <string name="title_travel_time">Travel Time</string>
