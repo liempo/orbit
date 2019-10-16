@@ -1,6 +1,5 @@
 package com.fourcode.tracking.standard.navigation
 
-import android.content.Context
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,16 +10,14 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
-import com.mapbox.services.android.navigation.v5.milestone.Milestone
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import kotlinx.android.synthetic.main.activity_navigation.*
 
-class NavigationActivity : AppCompatActivity(),
+class NavigationActivity :
+    AppCompatActivity(),
     NavigationListener,
-    ProgressChangeListener,
-    MilestoneEventListener {
+    ProgressChangeListener {
 
     private val args: NavigationActivityArgs by navArgs()
 
@@ -32,21 +29,8 @@ class NavigationActivity : AppCompatActivity(),
         setContentView(R.layout.activity_navigation)
 
         // Get token and adminId
-        with(
-            getSharedPreferences(
-                getString(
-                    R.string.shared_pref_credentials
-                ),
-                Context.MODE_PRIVATE
-            )
-        ) {
-
-            token = getString(
-                getString(
-                    R.string.shared_pref_token
-                ), null
-            )
-        }
+        token = PreferenceManager.getDefaultSharedPreferences(this)
+            .getString(getString(R.string.shared_pref_token), null)
 
         // Initialize navigation view
         nav_view.onCreate(savedInstanceState)
@@ -58,7 +42,6 @@ class NavigationActivity : AppCompatActivity(),
             val builder = NavigationViewOptions.builder()
                 .directionsRoute(directions)
                 .navigationListener(this)
-                .milestoneEventListener(this)
                 .progressChangeListener(this)
 
             val simulate = PreferenceManager
@@ -98,14 +81,6 @@ class NavigationActivity : AppCompatActivity(),
         location?.let {
             // TODO Notify socket new location
         }
-    }
-
-    override fun onMilestoneEvent(
-        routeProgress: RouteProgress?,
-        instruction: String?,
-        milestone: Milestone?
-    ) {
-        // TODO Notify socket milestone event
     }
 
     override fun onStart() {
