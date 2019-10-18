@@ -17,9 +17,8 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-import timber.log.Timber
+import kotlinx.serialization.json.*
+import org.json.JSONObject
 
 class NavigationActivity :
     AppCompatActivity(),
@@ -51,12 +50,12 @@ class NavigationActivity :
         })
 
         socket.on(Socket.EVENT_CONNECT) {
-            Timber.d("Socket is connected. Authenticating.")
+            val msg = json.toJson(
+                AuthData.serializer(),
+                AuthData(token!!)).toString()
 
             // Once connected, authenticate
-            socket.emit(CHANNEL_AUTH, json.toJson(
-                AuthData.serializer(), AuthData(token!!)
-            ))
+            socket.emit(CHANNEL_AUTH, JSONObject(msg))
         }
 
         // Initialize navigation view
@@ -116,15 +115,15 @@ class NavigationActivity :
         routeProgress: RouteProgress?
     ) {
         location?.let {
-            val data = LocationData(
-                it.latitude,
-                it.longitude,
-                routeProgress!!.currentState()!!.name,
-                it.speed.toInt()
-            )
+            val msg = json.toJson(
+                LocationData.serializer(),
+                LocationData(
+                    it.latitude,
+                    it.longitude,
+                    routeProgress!!.currentState()!!.name,
+                    it.speed.toInt())).toString()
 
-            socket.emit(CHANNEL_STATUS, json.toJson(
-                LocationData.serializer(), data))
+            socket.emit(CHANNEL_STATUS, JSONObject(msg))
         }
     }
 
