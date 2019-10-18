@@ -4,15 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fourcode.tracking.BuildConfig
+import com.fourcode.tracking.standard.Utils
 import com.fourcode.tracking.standard.home.WaypointsAdapter.Waypoint
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.geocoding.v5.GeocodingCriteria
-import com.mapbox.api.geocoding.v5.MapboxGeocoding
-import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,21 +24,13 @@ class StandardViewModel : ViewModel(),
 
     internal val route: MutableLiveData<DirectionsRoute> = MutableLiveData()
 
-    private suspend fun runReverseGeocode(point: Point): GeocodingResponse =
-        withContext(Dispatchers.IO) {
-            MapboxGeocoding.builder()
-                .accessToken(BuildConfig.MapboxApiKey)
-                .geocodingTypes(GeocodingCriteria.TYPE_LOCALITY)
-                .query(point)
-                .build().executeCall().body()!!
-        }
-
     internal fun getBestRoute(waypoints: List<Waypoint>) {
         viewModelScope.launch {
 
             val builder = MapboxDirections.builder()
                 .accessToken(BuildConfig.MapboxApiKey)
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .overview(DirectionsCriteria.OVERVIEW_FULL)
                 .voiceInstructions(true)
                 .bannerInstructions(true)
                 // I don' know what the
@@ -84,7 +74,7 @@ class StandardViewModel : ViewModel(),
         // Launch a kotlin co-routine
         viewModelScope.launch {
             // Run suspend function
-            val response = runReverseGeocode(point)
+            val response = Utils.requestGeocode(point)
 
             // If response is valid (not empty)
             val name = response.features()[0].text()
