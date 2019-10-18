@@ -63,14 +63,13 @@ class NavigationActivity :
                 ReplayRouteLocationEngine().apply { assign(directions)
                     this.updateSpeed(100) })
 
+            model.emitNotification("User has started navigation.")
             nav_view.startNavigation(builder.build())
         }
 
     }
 
     override fun onCancelNavigation() {
-        // TODO Send notification that
-        //  user has cancelled the navigation
         shouldBroadcastLocation = false
         model.disconnectSocket()
         nav_view.stopNavigation()
@@ -78,9 +77,8 @@ class NavigationActivity :
     }
 
     override fun onNavigationFinished() {
-        // TODO Send notification that user
-        //  has finished navigation
         shouldBroadcastLocation = false
+        model.emitNotification("User has arrived.")
         model.disconnectSocket()
 
         Timber.d("Finished navigation")

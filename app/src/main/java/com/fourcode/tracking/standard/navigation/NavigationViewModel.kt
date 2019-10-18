@@ -78,11 +78,22 @@ class NavigationViewModel: ViewModel() {
             // Convert geocodedLocationData to string
             val serialized = json.toJson(
                 LocationData.serializer(), data).toString()
-            Timber.d("Data to Broadcast: $serialized")
+            Timber.d("LocationData: $serialized")
 
             // Broadcast to socket
             socket.emit(CHANNEL_STATUS, serialized)
         }
+    }
+
+    internal fun emitNotification(message: String) {
+        // Process data
+        val data = NotificationData(message)
+        val serialized = json.toJson(NotificationData.
+            serializer(), data).toString()
+        Timber.d("NotificationData: $serialized")
+
+        // Broadcast to socket
+        socket.emit(CHANNEL_NOTIFICATION, serialized)
     }
 
     @Serializable
@@ -103,9 +114,15 @@ class NavigationViewModel: ViewModel() {
         fun toPoint(): Point = Point.fromLngLat(lng, lat)
     }
 
+    @Serializable
+    internal data class NotificationData(
+        val message: String
+    )
+
     companion object {
         private const val CHANNEL_AUTH = "auth"
         private const val CHANNEL_STATUS = "status"
+        private const val CHANNEL_NOTIFICATION = "notification"
     }
 
 }
