@@ -13,6 +13,6 @@ A tracking application to track multiple users (fleet management) with a turn-by
 - [x] Add a waypoint
 - [ ] Move a waypoint
 - [ ] Remove a waypoint
-- [ ] History
-- [ ] Broadcasting of status
+- [x] History
+- [x] Broadcasting of status
 - [ ] Send push notification
