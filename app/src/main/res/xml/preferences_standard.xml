@@ -6,20 +6,20 @@
         app:title="@string/title_fuel_cost">
 
         <EditTextPreference
-            app:key="pref_fuel_efficiency"
+            app:key="@string/pref_key_fuel_efficiency"
             app:title="@string/title_fuel_efficiency"
             app:defaultValue="25"
             app:useSimpleSummaryProvider="true"/>
 
         <EditTextPreference
-            app:key="pref_fuel_price"
+            app:key="@string/pref_key_fuel_price"
             app:title="@string/title_fuel_price"
             app:defaultValue="50"
             app:useSimpleSummaryProvider="true"/>
 
-        <!-- Convert to list -->
+        <!-- TODO Convert to list -->
         <EditTextPreference
-            app:key="pref_currency"
+            app:key="@string/pref_key_currency"
             app:title="@string/title_currency"
             app:defaultValue="PHP"
             app:useSimpleSummaryProvider="true"/>
@@ -30,7 +30,7 @@
         app:title="@string/title_navigation">
 
         <SwitchPreferenceCompat
-            app:key="pref_should_simulate"
+            app:key="@string/pref_key_should_simulate"
             app:title="@string/title_simulate"
             app:summary="Simulate route (for debugging purposes only)."
             app:defaultValue="false"/>

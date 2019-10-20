@@ -14,13 +14,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
     ) {
         setPreferencesFromResource(R.xml.preferences_standard, rootKey)
 
-        findPreference<EditTextPreference>("pref_fuel_efficiency")?.setOnBindEditTextListener {
-            it.inputType = InputType.TYPE_CLASS_NUMBER
-        }
+        findPreference<EditTextPreference>(getString(R.string.pref_key_fuel_efficiency))?.
+            setOnBindEditTextListener { it.inputType = InputType.TYPE_CLASS_NUMBER }
 
-        findPreference<EditTextPreference>("pref_fuel_price")?.setOnBindEditTextListener {
-            it.inputType = InputType.TYPE_CLASS_NUMBER
-        }
+        findPreference<EditTextPreference>(getString(R.string.pref_key_fuel_price))?.
+            setOnBindEditTextListener { it.inputType = InputType.TYPE_CLASS_NUMBER }
     }
 
 }

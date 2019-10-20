@@ -40,4 +40,9 @@
     <string name="title_navigation">Navigation</string>
     <string name="title_simulate">Simulate</string>
 
+    <string name="pref_key_fuel_efficiency">pref_fuel_eff</string>
+    <string name="pref_key_fuel_price">pref_fuel_price</string>
+    <string name="pref_key_currency">pref_currency</string>
+    <string name="pref_key_should_simulate">pref_currency</string>
+
 </resources>
