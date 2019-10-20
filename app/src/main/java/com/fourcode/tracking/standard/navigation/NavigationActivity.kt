@@ -89,8 +89,7 @@ class NavigationActivity :
     override fun onNavigationRunning() {
         nav_view.retrieveMapboxNavigation()?.let {
             it.addOffRouteListener {
-                // TODO Send notification that
-                //  user has gone off-route
+                model.emitNotification("User has gone off-route.")
             }
         }
     }
