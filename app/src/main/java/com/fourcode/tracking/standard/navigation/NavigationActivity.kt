@@ -102,8 +102,6 @@ class NavigationActivity :
             location?.let { model.emitLocation(it) }
     }
 
-
-
     override fun onStart() {
         super.onStart()
         nav_view.onStart()

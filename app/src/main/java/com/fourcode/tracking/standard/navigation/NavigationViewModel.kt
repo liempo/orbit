@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fourcode.tracking.BuildConfig
 import com.fourcode.tracking.standard.Utils
-import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.geometry.LatLng
+import com.fourcode.tracking.Models.AuthData
+import com.fourcode.tracking.Models.LocationData
+import com.fourcode.tracking.Models.NotificationData
 import io.socket.client.IO
 import io.socket.client.Socket
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import org.json.JSONObject
@@ -95,29 +95,6 @@ class NavigationViewModel: ViewModel() {
         // Broadcast to socket
         socket.emit(CHANNEL_NOTIFICATION, serialized)
     }
-
-    @Serializable
-    internal data class AuthData(
-        val token: String
-    )
-
-    @Suppress("unused")
-    @Serializable
-    internal data class LocationData(
-        val lat: Double,
-        val lng: Double,
-        val speed: Int,
-        var name: String = ""
-    ) {
-
-        fun toLatLng(): LatLng = LatLng(lat, lng)
-        fun toPoint(): Point = Point.fromLngLat(lng, lat)
-    }
-
-    @Serializable
-    internal data class NotificationData(
-        val message: String
-    )
 
     companion object {
         private const val CHANNEL_AUTH = "auth"
